@@ -1,0 +1,54 @@
+[
+  {
+    "name": "Lavazza Classico 250г",
+    "article": "LVZ250",
+    "prices": [
+      { "store": "Ozon", "price": 347 },
+      { "store": "Wildberries", "price": 329 },
+      { "store": "Яндекс.Маркет", "price": 355 }
+    ]
+  },
+  {
+    "name": "Philips Hue Лампа E27",
+    "article": "PH-HUE-01",
+    "prices": [
+      { "store": "Ozon", "price": 1290 },
+      { "store": "WB", "price": 1350 }
+    ]
+  }
+]
+async function loadPriceDatabase() {
+  try {
+  const {  { text } } = await Tesseract.recognize(file, 'rus+eng');
+  console.log('Распознано:', text);
+
+  // Простой поиск: ищем совпадение по артикулу или названию
+  const query = text.toLowerCase();
+  const found = prices.find(item =>
+    item.name.toLowerCase().includes(query) ||
+    item.article.toLowerCase().includes(query)
+  );
+
+  if (found) {
+    // Отображаем результат
+    result.innerHTML = '';
+    const mainRow = document.createElement('div');
+    mainRow.className = 'price-row';
+    mainRow.innerHTML = `<span><strong>${found.name}</strong></span><span></span>`;
+    result.appendChild(mainRow);
+
+    found.prices.forEach(p => {
+      const row = document.createElement('div');
+      row.className = 'price-row';
+      row.innerHTML = `<span>${p.store}</span><strong>${p.price} ₽</strong>`;
+      result.appendChild(row);
+    });
+    result.classList.remove('hidden');
+    dropzone.innerHTML = '<p>✅ Цены найдены!</p>';
+  } else {
+    dropzone.innerHTML = '<p>❌ Товар не найден. Попробуйте другое фото.</p>';
+  }
+} catch (err) {
+  console.error(err);
+  dropzone.innerHTML = '<p>❌ Ошибка распознавания. Попробуйте ещё раз.</p>';
+}
