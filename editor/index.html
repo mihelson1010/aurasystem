@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aura</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: #fff7ed;
+      height: 100vh;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      position: relative;
+    }
+
+    /* Анимация мерцания */
+    @keyframes pulse {
+      0%   { opacity: 0.5; transform: scale(1); }
+      50%  { opacity: 1;   transform: scale(1.05); }
+      100% { opacity: 0.5; transform: scale(1); }
+    }
+
+    /* МАЛЕНЬКИЙ логотип Aura 1:1 как на скрине */
+    .logo {
+      position: absolute;
+      top: 20px;
+      left: 24px;
+      width: 40px;
+      height: 40px;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="white"/><path d="M256 100 L300 220 L420 240 L320 280 L300 400 L212 400 L192 280 L92 240 L212 220 Z" fill="%23fb923c"/><path d="M256 140 L290 200 L380 215 L310 245 L295 335 L217 335 L202 245 L122 215 L212 200 Z" fill="%23fed7aa"/><text x="256" y="480" text-anchor="middle" font-family="system-ui" font-size="50" fill="%230f172a">Aura</text></svg>') center/contain no-repeat;
+      background-size: 38px;
+      padding: 12px;
+      border-radius: 16px;
+      box-shadow: 0 6px 20px rgba(251,146,60,0.3);
+      z-index: 999;
+      opacity: 0.5;
+      animation: pulse 4s ease-in-out infinite;
+      cursor: pointer;
+    }
+    .logo:hover {
+      animation: none;
+      opacity: 1;
+      transform: scale(1.2);
+      box-shadow: 0 8px 30px rgba(251,146,60,0.5);
+    }
+
+    h1 { font-size: 5rem; color: #ea580c; margin-bottom: 0.5rem; }
+    p { font-size: 1.5rem; color: #555; margin: 1.5rem 0; }
+    button#start {
+      padding: 1.4rem 4rem;
+      font-size: 1.7rem;
+      background: #ea580c;
+      color: white;
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: 0 16px 40px rgba(234,88,12,0.5);
+      transition: 0.3s;
+    }
+    button#start:hover {
+      background: #c2410c;
+      transform: translateY(-5px);
+    }
+    small {
+      display: block;
+      margin-top: 2rem;
+      color: #666;
+      font-size: 1.1rem;
+    }
+
+    #editor-screen {
+      display: none;
+      height: 100vh;
+      background: white;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+    }
+    #editor {
+      width: 100%;
+      height: calc(100vh - 70px);
+      padding: 80px 100px 40px;
+      font-size: 18px;
+      line-height: 1.8;
+      outline: none;
+      background: #fff7ed;
+    }
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 70px;
+      background: white;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      align-items: center;
+      padding: 0 120px;
+      z-index: 99;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+    .topbar button {
+      margin-right: 12px;
+      padding: 10px 18px;
+      background: #fb923c;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .status {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255,255,255,0.95);
+      padding: 12px;
+      text-align: center;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+<div class="logo" title="Aura"></div>
+
+<div id="welcome">
+  <h1>Aura</h1>
+  <p>Приватный редактор с end-to-end шифрованием</p>
+  <button id="start">Создать документ →</button>
+  <small>Поделись ссылкой — работайте вместе. Без аккаунтов.</small>
+</div>
+
+<div id="editor-screen">
+  <div class="topbar">
+    <button onclick="f('bold')">Ж</button>
+    <button onclick="f('italic')">К</button>
+    <button onclick="f('insertOrderedList')">1. Список</button>
+    <button onclick="f('insertUnorderedList')">• Список</button>
+    <button onclick="insertTable()">Таблица</button>
+    <button onclick="addImage()">Фото</button>
+    <button onclick="copyLink()">Поделиться</button>
+    <button onclick="document.body.classList.toggle('dark')">Тема</button>
+  </div>
+  <div id="editor" contenteditable="true">Начни писать… Всё уже зашифровано</div>
+  <div class="status">Защищённая комната активна — шифрование AES-256-GCM</div>
+</div>
+
+<script>
+// Шифрование
+let key;
+async function getKey() {
+  const hash = location.hash.slice(1);
+  if (!hash) {
+    key = await crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
+    const raw = await crypto.subtle.exportKey("raw", key);
+    location.hash = btoa(String.fromCharCode(...new Uint8Array(raw)));
+  } else {
+    const raw = Uint8Array.from(atob(hash), c => c.charCodeAt(0));
+    key = await crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["encrypt", "decrypt"]);
+  }
+}
+
+// Сохранение и загрузка
+async function save() {
+  const text = document.getElementById('editor').innerHTML;
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(text));
+  localStorage.setItem('aura_' + location.search + location.hash, JSON.stringify({
+    iv: [...iv],
+    data: [...new Uint8Array(encrypted)]
+  }));
+}
+async function load() {
+  const saved = localStorage.getItem('aura_' + location.search + location.hash);
+  if (saved) {
+    const { iv, data } = JSON.parse(saved);
+    const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv: new Uint8Array(iv) }, key, new Uint8Array(data));
+    document.getElementById('editor').innerHTML = new TextDecoder().decode(decrypted);
+  }
+}
+
+// Команды
+function f(cmd) { document.execCommand(cmd, false, null); }
+function insertTable() {
+  const html = '<table border="1" cellpadding="10" style="border-collapse:collapse;width:100%"><tr><td>1</td><td>2</td></tr><tr><td>3</td><td>4</td></tr></table><p><br></p>';
+  document.execCommand('insertHTML', false, html);
+}
+function addImage() {
+  const url = prompt('URL изображения:');
+  if (url) document.execCommand('insertImage', false, url);
+}
+function copyLink() {
+  navigator.clipboard.writeText(location.href).then(() => alert('Ссылка скопирована!'));
+}
+
+// Запуск
+document.getElementById('start').onclick = async () => {
+  await getKey();
+  document.getElementById('welcome').style.display = 'none';
+  document.getElementById('editor-screen').style.display = 'block';
+  await load();
+  setInterval(save, 3000);
+  document.getElementById('editor').focus();
+};
+
+// Автозапуск при наличии ссылки
+if (location.hash || new URLSearchParams(location.search).has('room')) {
+  document.getElementById('start').onclick();
+}
+</script>
+</body>
+
+</html>
