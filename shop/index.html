@@ -56,26 +56,22 @@
 <body>
 
 <div class="dropzone" id="dropzone">
-  <p>📷 Перетащите фото или скриншот товара<br><small>(поддерживаются JPG, PNG)</small></p>
+  <p>📷 Перетащите фото товара<br><small>(JPG, PNG)</small></p>
 </div>
 
-<div id="result" class="hidden">
-  <div class="price-row">
-    <span>Lavazza Classico 250г</span>
-    <strong>329 ₽</strong>
-  </div>
-  <div class="price-row">
-    <span>Ozon</span>
-    <strong>347 ₽</strong>
-  </div>
-  <div class="price-row">
-    <span>Яндекс.Маркет</span>
-    <strong>355 ₽</strong>
-  </div>
-</div>
+<div id="result" class="hidden"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script>
+  // Загрузка базы цен
+  let prices = [];
+  fetch('prices.json')
+    .then(res => res.json())
+    .then(data => prices = data)
+    .catch(() => {
+      console.warn('prices.json не найден');
+    });
+
   const dropzone = document.getElementById('dropzone');
   const result = document.getElementById('result');
 
@@ -91,38 +87,56 @@
   dropzone.addEventListener('drop', async (e) => {
     e.preventDefault();
     dropzone.classList.remove('dragover');
-    
     const file = e.dataTransfer.files[0];
     if (!file || !file.type.match('image.*')) return;
-    
-    dropzone.innerHTML = '<p>Распознаю текст…</p>';
-    
-    try {
-      const { data: { text } } = await Tesseract.recognize(file, 'rus+eng');
-      console.log('Распознано:', text);
-      
-      // TODO: поиск в базе цен
-      // Пока — показываем демо-результат
-      result.classList.remove('hidden');
-      dropzone.innerHTML = '<p>✅ Готово! Цены найдены.</p>';
-    } catch (err) {
-      console.error(err);
-      dropzone.innerHTML = '<p>❌ Не удалось распознать. Попробуйте другое фото.</p>';
-    }
+    processImage(file);
   });
 
-  // Клик = выбор файла
   dropzone.addEventListener('click', () => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    input.onchange = (e) => {
-      const event = new DragEvent('drop', { bubbles: true });
-      event.dataTransfer = { files: e.target.files };
-      dropzone.dispatchEvent(event);
-    };
+    input.onchange = (e) => processImage(e.target.files[0]);
     input.click();
   });
+
+  async function processImage(file) {
+    dropzone.innerHTML = '<p>🔍 Распознаю текст…</p>';
+    try {
+      const {  { text } } = await Tesseract.recognize(file, 'rus+eng');
+      console.log('Распознано:', text);
+
+      // Поиск по базе
+      const query = text.toLowerCase();
+      const found = prices.find(item =>
+        item.name.toLowerCase().includes(query) ||
+        item.article.toLowerCase().includes(query)
+      );
+
+      if (found) {
+        result.innerHTML = '';
+        // Основное название
+        const header = document.createElement('div');
+        header.className = 'price-row';
+        header.innerHTML = `<span><strong>${found.name}</strong></span><span></span>`;
+        result.appendChild(header);
+        // Цены
+        found.prices.forEach(p => {
+          const row = document.createElement('div');
+          row.className = 'price-row';
+          row.innerHTML = `<span>${p.store}</span><strong>${p.price} ₽</strong>`;
+          result.appendChild(row);
+        });
+        result.classList.remove('hidden');
+        dropzone.innerHTML = '<p>✅ Готово! Цены найдены.</p>';
+      } else {
+        dropzone.innerHTML = '<p>❌ Товар не найден. Попробуйте другое фото.</p>';
+      }
+    } catch (err) {
+      console.error(err);
+      dropzone.innerHTML = '<p>❌ Ошибка распознавания.</p>';
+    }
+  }
 </script>
 </body>
 </html>
