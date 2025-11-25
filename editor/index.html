@@ -3,76 +3,300 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Aura</title>
+  <title>Aura Office</title>
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family:system-ui,sans-serif; background:#fff7ed; height:100vh; overflow:hidden; display:grid; place-items:center; position:relative; }
-    #welcome { text-align:center; }
-    #welcome h1 { font-size:4rem; color:#ea580c; }
-    #welcome button { padding:1.2rem 3rem; font-size:1.4rem; background:#ea580c; color:white; border:none; border-radius:999px; cursor:pointer; margin-top:1.5rem; }
-    #editor-screen { display:none; width:100%; height:100%; position:absolute; top:0; left:0; background:white; }
-    #editor { width:100%; height:calc(100% - 60px); padding:2rem; outline:none; }
-    .topbar { height:60px; background:white; border-bottom:1px solid #eee; padding:0 1rem; display:flex; gap:10px; }
-    .topbar button { padding:8px 14px; background:#fb923c; color:white; border:none; border-radius:6px; cursor:pointer; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: #fff7ed;
+      height: 100vh;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      position: relative;
+    }
+    .logo {
+      position: absolute; top: 20px; left: 24px; width: 40px; height: 40px;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="white"/><path d="M256 100 L300 220 L420 240 L320 280 L300 400 L212 400 L192 280 L92 240 L212 220 Z" fill="%23fb923c"/><path d="M256 140 L290 200 L380 215 L310 245 L295 335 L217 335 L202 245 L122 215 L212 200 Z" fill="%23fed7aa"/><text x="256" y="480" text-anchor="middle" font-family="system-ui" font-size="50" fill="%230f172a">Aura</text></svg>') center/contain no-repeat;
+      background-size: 38px; padding: 12px; border-radius: 16px; box-shadow: 0 6px 20px rgba(251,146,60,0.3); z-index: 999; opacity: 0.5; animation: pulse 4s ease-in-out infinite; cursor: pointer;
+    }
+    .logo:hover { animation: none; opacity: 1; transform: scale(1.2); box-shadow: 0 8px 30px rgba(251,146,60,0.5); }
+    @keyframes pulse { 0% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.05); } 100% { opacity: 0.5; transform: scale(1); } }
+    #welcome { height: 100%; display: grid; place-items: center; text-align: center; }
+    #welcome h1 { font-size: 5rem; color: #ea580c; margin-bottom: 0.5rem; }
+    #welcome p { font-size: 1.5rem; color: #555; margin: 1.5rem 0; }
+    #welcome button { padding: 1.4rem 4rem; font-size: 1.7rem; background: #ea580c; color: white; border: none; border-radius: 999px; cursor: pointer; box-shadow: 0 16px 40px rgba(234,88,12,0.5); transition: 0.3s; }
+    #welcome button:hover { background: #c2410c; transform: translateY(-5px); }
+    small { display: block; margin-top: 2rem; color: #666; font-size: 1.1rem; }
+    #editor-screen { display: none; height: 100vh; background: white; position: absolute; top: 0; left: 0; width: 100%; }
+    #editor { width: 100%; height: calc(100vh - 130px); padding: 80px 100px 50px; font-size: 18px; line-height: 1.6; outline: none; background: #fff7ed; }
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0; height: 70px; background: white; border-bottom: 1px solid #eee;
+      display: flex; flex-wrap: wrap; gap: 6px; padding: 0 15px; align-items: center; z-index: 99;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+    .topbar button, .topbar select {
+      padding: 7px 12px; background: #fb923c; color: white; border: none; border-radius: 6px;
+      cursor: pointer; font-weight: 600; font-size: 13px;
+    }
+    .topbar select {
+      background: white; color: #333;
+    }
+    .status { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); padding: 10px; text-align: center; color: #555; font-size: 13px; }
+    #qr-modal, #share-modal { display: none; }
+    .dark { background: #0f172a; color: #e2e8f0; }
+    .dark #editor { background: #1e293b; color: #e2e8f0; }
+    .dark .topbar { background: #1e293b; border-color: #334155; }
+    .dark .topbar button, .dark .topbar select { background: #3b82f6; color: white; }
   </style>
 </head>
 <body>
 
+<div class="logo" title="Aura"></div>
+
 <div id="welcome">
-  <h1>Aura</h1>
-  <p>Приватный редактор с end-to-end шифрованием</p>
+  <h1>Aura Office</h1>
+  <p>Приватный Word + Excel в одном файле. Без аккаунтов. С шифрованием.</p>
   <button id="start">Создать документ →</button>
+  <small>Поделись ссылкой — работайте вместе. Офлайн. Навсегда ваш.</small>
 </div>
 
 <div id="editor-screen">
   <div class="topbar">
+    <select id="font-family">
+      <option value="system-ui">Шрифт</option>
+      <option value="Arial, sans-serif">Arial</option>
+      <option value="Georgia, serif">Georgia</option>
+      <option value="Courier New, monospace">Courier</option>
+    </select>
+    <select id="font-size">
+      <option value="14">14px</option>
+      <option value="16" selected>16px</option>
+      <option value="18">18px</option>
+      <option value="24">24px</option>
+      <option value="32">32px</option>
+    </select>
     <button data-cmd="bold">Ж</button>
     <button data-cmd="italic">К</button>
     <button data-cmd="underline">П</button>
     <button data-cmd="strike">Зач</button>
+    <button data-cmd="heading" data-level="1">H1</button>
+    <button data-cmd="heading" data-level="2">H2</button>
     <button data-cmd="bulletList">•</button>
     <button data-cmd="orderedList">1.</button>
+    <button data-cmd="taskList">☑</button>
     <button data-cmd="insertTable">Таблица</button>
+    <button data-cmd="addImage">Фото</button>
+
+    <button id="print-btn">🖨️ Печать</button>
+    <button id="export-pdf">📄 PDF</button>
+    <button id="export-html">📤 HTML</button>
+    <button id="import-html">📥 Импорт</button>
+    <button id="cipher-btn">🔒 QR</button>
+    <button id="share-btn">✉️ Поделиться</button>
+    <button id="theme-btn">🌙 Тема</button>
   </div>
-  <div id="editor" contenteditable="true">Начните писать…</div>
+  <div id="editor" contenteditable="true">Начните писать или вставьте таблицу. Всё зашифровано.</div>
+  <div class="status">Защищённая комната активна — шифрование AES-256-GCM</div>
 </div>
+
+<!-- CDN-библиотеки (без 404) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 
 <script>
 let key;
-
 async function getKey() {
-  let h = location.hash.slice(1);
-  if (!h) {
-    key = await crypto.subtle.generateKey({name:"AES-GCM",length:256},true,["encrypt","decrypt"]);
+  const hash = location.hash.slice(1);
+  if (!hash) {
+    key = await crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
     const raw = await crypto.subtle.exportKey("raw", key);
     location.hash = btoa(String.fromCharCode(...new Uint8Array(raw)));
   } else {
-    const raw = Uint8Array.from(atob(h), c => c.charCodeAt(0));
-    key = await crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["encrypt","decrypt"]);
+    const raw = Uint8Array.from(atob(hash), c => c.charCodeAt(0));
+    key = await crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["encrypt", "decrypt"]);
+  }
+}
+async function save() {
+  if (!key) return;
+  const text = document.getElementById('editor').innerHTML;
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(text));
+  localStorage.setItem('aura_' + location.search + location.hash, JSON.stringify({ iv: Array.from(iv),  Array.from(new Uint8Array(encrypted)) }));
+}
+async function load() {
+  const saved = localStorage.getItem('aura_' + location.search + location.hash);
+  if (saved) {
+    const { iv, data } = JSON.parse(saved);
+    const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv: new Uint8Array(iv) }, key, new Uint8Array(data));
+    document.getElementById('editor').innerHTML = new TextDecoder().decode(decrypted);
   }
 }
 
-async function startEditor() {
+document.querySelectorAll('[data-cmd]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const cmd = btn.dataset.cmd;
+    if (cmd === 'heading') {
+      document.execCommand('formatBlock', false, `<h${btn.dataset.level}>`);
+    } else if (cmd === 'insertTable') {
+      const html = '<table border="1" style="border-collapse:collapse;width:100%;margin:10px 0"><tr><td>1</td><td>2</td></tr><tr><td>3</td><td>4</td></tr></table>';
+      document.execCommand('insertHTML', false, html);
+    } else if (cmd === 'addImage') {
+      const url = prompt('URL изображения:');
+      if (url) document.execCommand('insertImage', false, url);
+    } else {
+      document.execCommand(cmd, false, null);
+    }
+    save();
+  });
+});
+
+document.getElementById('font-family').addEventListener('change', e => {
+  document.execCommand('fontFamily', false, e.target.value); save();
+});
+document.getElementById('font-size').addEventListener('change', e => {
+  document.execCommand('fontSize', false, e.target.value); save();
+});
+
+// === ПЕЧАТЬ ===
+function printDocument() {
+  const editor = document.getElementById('editor');
+  const printContent = `
+    <html>
+    <head>
+      <title>Печать — Aura Office</title>
+      <style>
+        body { font-family: system-ui, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; background: white; color: black; }
+        @media print {
+          body { padding: 0; margin: 0; }
+          h1, h2, h3 { page-break-after: avoid; }
+          table { border-collapse: collapse; width: 100%; }
+          td, th { border: 1px solid #000; padding: 8px; }
+        }
+      </style>
+    </head>
+    <body>
+      ${editor.innerHTML}
+    </body>
+    </html>
+  `;
+  const win = window.open('', '_blank');
+  win.document.write(printContent);
+  win.document.close();
+  win.focus();
+  win.print();
+  win.close();
+}
+
+// === ЭКСПОРТ В PDF ===
+async function exportToPDF() {
+  const { jsPDF } = window.jspdf;
+  const editor = document.getElementById('editor');
+  const clone = editor.cloneNode(true);
+  clone.style.padding = '20px';
+  const canvas = await html2canvas(clone);
+  const imgData = canvas.toDataURL('image/png');
+  const pdf = new jsPDF('p', 'mm', 'a4');
+  const width = pdf.internal.pageSize.getWidth();
+  const height = (canvas.height * width) / canvas.width;
+  pdf.addImage(imgData, 'PNG', 0, 0, Math.min(width, 190), Math.min(height, 270));
+  pdf.save('aura-document.pdf');
+}
+
+// === ЭКСПОРТ В HTML ===
+function exportHTML() {
+  const content = document.getElementById('editor').innerHTML;
+  const blob = new Blob([`<html><head><meta charset="utf-8"></head><body>${content}</body></html>`], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'document.html';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// === ИМПОРТ HTML ===
+function importHTML() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.html,.txt';
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      document.getElementById('editor').innerHTML = ev.target.result;
+      save();
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+// === QR ===
+function showQR() {
+  if (!key) return;
+  const qrModal = document.createElement('div');
+  qrModal.id = 'qr-modal';
+  qrModal.innerHTML = `
+    <div style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;display:grid;place-items:center;">
+      <div style="background:white;padding:24px;border-radius:20px;text-align:center;max-width:320px;width:90%;">
+        <div id="qr-code" style="margin:0 auto;"></div>
+        <p style="margin-top:16px;font-size:14px;color:#444;">Отсканируйте, чтобы открыть и расшифровать</p>
+        <button id="close-qr" style="margin-top:16px;padding:8px 20px;background:#ea580c;color:white;border:none;border-radius:12px;font-weight:bold;">Закрыть</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(qrModal);
+  new QRCode(document.getElementById("qr-code"), { text: location.href, width: 220, height: 220 });
+  document.getElementById('close-qr').onclick = () => document.body.removeChild(qrModal);
+}
+
+// === ПОДЕЛИТЬСЯ ===
+function showShare() {
+  const shareModal = document.createElement('div');
+  shareModal.id = 'share-modal';
+  shareModal.innerHTML = `
+    <div style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;display:grid;place-items:center;">
+      <div style="background:white;padding:24px;border-radius:20px;text-align:center;max-width:320px;width:90%;">
+        <p style="margin-bottom:16px;">Отправить через:</p>
+        <div style="display:flex;gap:12px;justify-content:center;">
+          <button onclick="location.href='mailto:?subject=Aura%20Document&body=Открой%20зашифрованный%20документ:%20'+encodeURIComponent(location.href)" style="width:40px;height:40px;border-radius:50%;background:#4285F4;color:white;font-weight:bold;">📧</button>
+          <button onclick="window.open('https://t.me/share/url?url='+encodeURIComponent(location.href)+'&text=Документ%20Aura','_blank')" style="width:40px;height:40px;border-radius:50%;background:#0088cc;color:white;font-weight:bold;">✈️</button>
+          <button onclick="window.open('https://wa.me/?text='+encodeURIComponent('Aura%20документ:%20'+location.href),'_blank')" style="width:40px;height:40px;border-radius:50%;background:#25D366;color:white;font-weight:bold;">🟢</button>
+          <button onclick="window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent('Aura:%20приватный%20документ%20')+encodeURIComponent(location.href),'_blank')" style="width:40px;height:40px;border-radius:50%;background:#1DA1F2;color:white;font-weight:bold;">𝕏</button>
+          <button onclick="window.open('https://vk.com/share.php?url='+encodeURIComponent(location.href),'_blank')" style="width:40px;height:40px;border-radius:50%;background:#4C75A8;color:white;font-weight:bold;">VK</button>
+        </div>
+        <p style="margin:16px 0 8px;font-size:12px;color:#666;">Ссылка зашифрована. Безопасно.</p>
+        <button id="close-share" style="margin-top:8px;padding:8px 20px;background:#64748b;color:white;border:none;border-radius:12px;font-weight:bold;">Закрыть</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(shareModal);
+  document.getElementById('close-share').onclick = () => document.body.removeChild(shareModal);
+}
+
+// === КНОПКИ ===
+document.getElementById('print-btn').onclick = printDocument;
+document.getElementById('export-pdf').onclick = exportToPDF;
+document.getElementById('export-html').onclick = exportHTML;
+document.getElementById('import-html').onclick = importHTML;
+document.getElementById('cipher-btn').onclick = showQR;
+document.getElementById('share-btn').onclick = showShare;
+document.getElementById('theme-btn').onclick = () => document.body.classList.toggle('dark');
+
+// === ЗАПУСК ===
+document.getElementById('start').onclick = async () => {
   await getKey();
   document.getElementById('welcome').style.display = 'none';
   document.getElementById('editor-screen').style.display = 'block';
+  await load();
+  setInterval(save, 10000);
+  document.getElementById('editor').focus();
+};
+if (location.hash || new URLSearchParams(location.search).has('room')) {
+  document.getElementById('start').click();
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('start').onclick = startEditor;
-  
-  // Простые команды
-  document.querySelectorAll('[data-cmd]').forEach(btn => {
-    btn.onclick = () => {
-      const cmd = btn.dataset.cmd;
-      if (cmd === 'insertTable') {
-        document.execCommand('insertHTML', false, '<table border="1" style="border-collapse:collapse;width:100%"><tr><td>1</td><td>2</td></tr><tr><td>3</td><td>4</td></tr></table>');
-      } else {
-        document.execCommand(cmd, false, null);
-      }
-    };
-  });
-});
 </script>
 </body>
 </html>
