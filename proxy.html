@@ -35,7 +35,7 @@
 <body class="dark">
   <div class="top">
     <input id="url" placeholder="Введи URL (youtube.com)" value="">
-    <button id="go" title="Открыть в iframe">Открыть</button>
+    <iframe id="frame" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups allow-downloads allow-top-navigation-by-user-activation"></iframe>
     <button id="newtab" title="Открыть в новой вкладке">Новая вкладка</button>
     <button onclick="copyLink()" title="Скопировать ссылку">Ссылка</button>
     <button onclick="toggleTheme()" title="Тема">Тема</button>
