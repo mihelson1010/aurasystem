@@ -41,12 +41,10 @@
       window.open(url, '_blank');
     }
 
-    // Автообновление при Enter
     urlInput.addEventListener('keydown', e => {
       if (e.key === 'Enter') openSite();
     });
 
-    // Автозагрузка при старте
     openSite();
   </script>
 </body>
