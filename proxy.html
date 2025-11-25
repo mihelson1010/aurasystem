@@ -1,44 +1,108 @@
 <!DOCTYPE html>
-<html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AuraProxy</title><style>
-*{margin:0;padding:0;box-sizing:border-box}body{font-family:system-ui,sans-serif;background:#0f172a;color:#e2e8f0;height:100vh;display:grid;grid-template-rows:auto 1fr;overflow:hidden}
-.top{height:60px;background:#1e293b;border-bottom:1px solid #334155;padding:0 1rem;display:flex;align-items:center;gap:12px}
-.top input{flex:1;padding:12px 16px;background:#334155;border:none;border-radius:8px;color:#e2e8f0;font-size:16px;outline:none}
-.top button{padding:10px 16px;background:#fb923c;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600}
-iframe{border:none;width:100%;height:100%;background:#fff}
-.dark{background:#0f172a}.status{position:fixed;bottom:0;left:0;right:0;background:rgba(15,23,42,.9);color:#94a3b8;padding:6px;text-align:center;font-size:12px;z-index:99}
-</style></head><body class="dark">
-<div class="top">
-  <input id="url" placeholder="Введи URL (https://example.com)" value="">
-  <button id="go">→</button>
-  <button onclick="copy()">Ссылка</button>
-  <button onclick="document.body.classList.toggle('dark')">Тема</button>
-</div>
-<iframe id="frame" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups"></iframe>
-<div class="status">AuraProxy активен — полная анонимность</div>
-<script>
-let k=null;
-const e=document.getElementById("url"),f=document.getElementById("frame"),g=document.getElementById("go");
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AuraProxy</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; height: 100vh; display: grid; grid-template-rows: auto 1fr; overflow: hidden; }
+    .top { height: 60px; background: #1e293b; border-bottom: 1px solid #334155; padding: 0 1rem; display: flex; align-items: center; gap: 12px; }
+    .top input { flex: 1; padding: 12px 16px; background: #334155; border: none; border-radius: 8px; color: #e2e8f0; font-size: 16px; outline: none; }
+    .top button { padding: 10px 16px; background: #fb923c; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+    iframe { border: none; width: 100%; height: 100%; background: #fff; }
+    .status { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(15,23,42,0.9); color: #94a3b8; padding: 6px; text-align: center; font-size: 12px; z-index: 99; }
+    .light { background: #fff; color: #0f172a; }
+    .light .top { background: #f8fafc; border-color: #e2e8f0; }
+    .light .top input { background: #f1f5f9; color: #0f172a; }
+  </style>
+</head>
+<body class="dark">
+  <div class="top">
+    <input id="url" placeholder="Введи URL (https://example.com)" value="">
+    <button id="go">Открыть</button>
+    <button onclick="copyLink()">Ссылка</button>
+    <button onclick="toggleTheme()">Тема</button>
+  </div>
+  <iframe id="frame"></iframe>
+  <div class="status">AuraProxy активен — полная анонимность, 0 серверов</div>
+  <script>
+    let key;
+    const urlInput = document.getElementById('url');
+    const frame = document.getElementById('frame');
+    const goBtn = document.getElementById('go');
 
-async function gen(){k=await crypto.subtle.generateKey({name:"AES-GCM",length:256},true,["encrypt","decrypt"]);const r=await crypto.subtle.exportKey("raw",k);location.hash=btoa(String.fromCharCode(...new Uint8Array(r)))}
-async function getKey(){let h=location.hash.slice(1);if(!h){await gen();return}try{const r=Uint8Array.from(atob(h),c=>c.charCodeAt(0));k=await crypto.subtle.importKey("raw",r,"AES-GCM",false,["encrypt","decrypt"])}catch{alert("Ключ битый");location.hash="";await gen()}}
-async function enc(t){const i=crypto.getRandomValues(new Uint8Array(12)),d=await crypto.subtle.encrypt({name:"AES-GCM",iv:i},k,new TextEncoder().encode(t));return btoa(String.fromCharCode(...i,...new Uint8Array(d)))}
-async function dec(t){try{const [i,b]=atob(t).split("").reduce((a,c,i)=>i<12?a[0].push(c.charCodeAt(0))&&a:a[1].push(c.charCodeAt(0))&&a,[[],[]]),d=await crypto.subtle.decrypt({name:"AES-GCM",iv:new Uint8Array(i)},k,new Uint8Array(b));return new TextDecoder().decode(d)}catch{return""}}
+    async function getKey() {
+      let h = location.hash.slice(1);
+      if (!h) {
+        key = await crypto.subtle.generateKey({name:"AES-GCM",length:256},true,["encrypt","decrypt"]);
+        const raw = await crypto.subtle.exportKey("raw", key);
+        location.hash = btoa(String.fromCharCode.apply(null, new Uint8Array(raw)));
+      } else {
+        try {
+          const raw = Uint8Array.from(atob(h), c => c.charCodeAt(0));
+          key = await crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["encrypt","decrypt"]);
+        } catch(e) {
+          alert('Ключ битый — создаём новый');
+          location.hash = '';
+          location.reload();
+        }
+      }
+    }
 
-function go(){
-  let u=e.value.trim();
-  if(!u)return;
-  if(!u.startsWith("http"))u="https://"+u;
-  enc(u).then(c=>location.hash=btoa(c));
-}
-function load(){
-  if(!location.hash.slice(1))return;
-  dec(location.hash.slice(1)).then(u=>{if(u){e.value=u;f.src=u}});
-}
-function copy(){navigator.clipboard.writeText(location.href).then(()=>alert("Ссылка скопирована"))}
+    async function encrypt(text) {
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const encrypted = await crypto.subtle.encrypt({name:"AES-GCM", iv}, key, new TextEncoder().encode(text));
+      const combined = new Uint8Array(iv.byteLength + encrypted.byteLength);
+      combined.set(new Uint8Array(iv), 0);
+      combined.set(new Uint8Array(encrypted), iv.byteLength);
+      return btoa(String.fromCharCode.apply(null, combined));
+    }
 
-g.onclick=go;
-e.addEventListener("keydown",ev=>ev.key==="Enter"&&go());
-window.addEventListener("hashchange",load);
-getKey().then(load);
-</script>
-</body></html>
+    async function decrypt(encryptedHash) {
+      try {
+        const binary = atob(encryptedHash);
+        const combined = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) combined[i] = binary.charCodeAt(i);
+        const iv = combined.slice(0, 12);
+        const data = combined.slice(12);
+        const decrypted = await crypto.subtle.decrypt({name:"AES-GCM", iv}, key, data);
+        return new TextDecoder().decode(decrypted);
+      } catch(e) {
+        return '';
+      }
+    }
+
+    async function loadSite() {
+      let url = urlInput.value.trim();
+      if (!url) return;
+      if (!url.startsWith('http')) url = 'https://' + url;
+      const encHash = await encrypt(url);
+      location.hash = encHash;
+      frame.src = url;
+    }
+
+    async function loadFromHash() {
+      if (!location.hash.slice(1)) return;
+      const url = await decrypt(location.hash.slice(1));
+      if (url) {
+        urlInput.value = url;
+        frame.src = url;
+      }
+    }
+
+    function copyLink() {
+      navigator.clipboard.writeText(location.href).then(() => alert('Ссылка скопирована!'));
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('light');
+    }
+
+    goBtn.onclick = loadSite;
+    urlInput.addEventListener('keydown', e => { if (e.key === 'Enter') loadSite(); });
+    window.addEventListener('hashchange', loadFromHash);
+    getKey().then(loadFromHash);
+  </script>
+</body>
+</html>
