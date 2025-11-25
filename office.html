@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Aura Office</title><style>
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:system-ui,sans-serif;background:#fff7ed;height:100vh;overflow:hidden;display:grid;place-items:center;position:relative}
+.logo{position:absolute;top:20px;left:24px;width:40px;height:40px;background:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="white"/><path d="M256 100 L300 220 L420 240 L320 280 L300 400 L212 400 L192 280 L92 240 L212 220 Z" fill="%23fb923c"/><path d="M256 140 L290 200 L380 215 L310 245 L295 335 L217 335 L202 245 L122 215 L212 200 Z" fill="%23fed7aa"/><text x="256" y="480" text-anchor="middle" font-family="system-ui" font-size="50" fill="%230f172a">Aura</text></svg>') center/contain no-repeat;background-size:38px;padding:12px;border-radius:16px;box-shadow:0 6px 20px rgba(251,146,60,.3);opacity:.5;animation:p 4s infinite}@keyframes p{50%{opacity:1;transform:scale(1.05)}}
+#welcome{text-align:center}#welcome h1{font-size:5rem;color:#ea580c}#welcome button{padding:1.4rem 4rem;font-size:1.7rem;background:#ea580c;color:#fff;border:none;border-radius:999px;cursor:pointer}
+#e{display:none;width:100%;height:100%;position:absolute;top:0;left:0;background:#fff}
+#editor{width:100%;height:calc(100% - 60px);padding:2rem;outline:none;user-select:text;caret-color:#ea580c}
+.topbar{height:60px;background:#fff;border-bottom:1px solid #eee;padding:0 1rem;display:flex;gap:10px;align-items:center;position:fixed;top:0;left:0;right:0;z-index:99}
+.topbar button{padding:8px 14px;background:#fb923c;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:14px}
+.status{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.95);padding:10px;text-align:center;color:#555;font-size:13px}
+.dark{background:#0f172a;color:#e2e8f0}.dark #editor{background:#1e293b;color:#e2e8f0}.dark .topbar{background:#1e293b;border-color:#334155}
+</style></head><body>
+
+<div class="logo"></div>
+<div id="welcome"><h1>Aura</h1><p>Приватный редактор с end-to-end шифрованием</p><button id="s">Создать документ →</button></div>
+
+<div id="e"><div class="topbar">
+<button onclick="f('bold')">Ж</button><button onclick="f('italic')">К</button><button onclick="f('underline')">П</button>
+<button onclick="f('strikeThrough')">Зач</button><button onclick="f('insertUnorderedList')">•</button><button onclick="f('insertOrderedList')">1.</button>
+<button onclick="f('insertTable')">Таблица</button><button onclick="copyLink()">Ссылка</button>
+<button onclick="document.body.classList.toggle('dark');document.getElementById('editor').classList.toggle('dark')">Тема</button>
+</div><div id="editor" contenteditable="true">Начните писать…</div>
+<div class="status">Защищённая комната активна — AES-256-GCM</div></div>
+
+<script>
+let k=null;
+const btoa2=b=>btoa(String.fromCharCode(...new Uint8Array(b)));
+const atob2=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0)).buffer;
+
+async function getKey(){try{let h=location.hash.slice(1);if(!h){k=await crypto.subtle.generateKey({name:"AES-GCM",length:256},true,["encrypt","decrypt"]);const r=await crypto.subtle.exportKey("raw",k);location.hash=btoa2(r)}else{k=await crypto.subtle.importKey("raw",atob2(h),"AES-GCM",false,["encrypt","decrypt"])}}catch(e){alert("Ключ битый — создаём новый");history.replaceState(null,null," ");location.reload()}}
+
+async function save(){if(!k)return;const i=crypto.getRandomValues(new Uint8Array(12));const d=new TextEncoder().encode(document.getElementById('editor').innerHTML);const e=await crypto.subtle.encrypt({name:"AES-GCM",iv:i},k,d);localStorage.setItem("aura_"+location.hash,JSON.stringify({i:[...i],d:[...new Uint8Array(e)]}))}
+async function load(){const s=localStorage.getItem("aura_"+location.hash);if(!s)return;try{const {i,d}=JSON.parse(s);const dec=await crypto.subtle.decrypt({name:"AES-GCM",iv:new Uint8Array(i)},k,new Uint8Array(d));document.getElementById('editor').innerHTML=new TextDecoder().decode(dec)}catch(e){}}
+
+function copyLink(){navigator.clipboard.writeText(location.href).then(()=>alert("Ссылка скопирована"))}
+function f(cmd){if(cmd==="insertTable"){document.execCommand("insertHTML",false,'<table border=1 style="border-collapse:collapse;width:100%"><tr><td>1</td><td>2</td></tr><tr><td>3</td><td>4</td></tr></table><p><br></p>')}else{document.execCommand(cmd,false,null)}save()}
+
+async function start(){await getKey();document.getElementById("welcome").style.display="none";document.getElementById("e").style.display="block";await load();const ed=document.getElementById("editor");ed.focus();setInterval(save,5000)}
+document.getElementById("s").onclick=start;
+if(location.hash)start();
+</script>
+</body></html>
