@@ -7,11 +7,26 @@
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; height: 100vh; display: grid; grid-template-rows: auto 1fr; overflow: hidden; }
-    .top { height: 60px; background: #1e293b; border-bottom: 1px solid #334155; padding: 0 1rem; display: flex; align-items: center; gap: 12px; }
-    .top input { flex: 1; padding: 12px 16px; background: #334155; border: none; border-radius: 8px; color: #e2e8f0; font-size: 16px; outline: none; }
-    .top button { padding: 10px 16px; background: #fb923c; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+    .top {
+      height: 60px; background: #1e293b; border-bottom: 1px solid #334155;
+      padding: 0 1.5rem; display: flex; align-items: center; gap: 12px;
+    }
+    .top input {
+      flex: 1; padding: 12px 16px; background: #334155; border: none;
+      border-radius: 8px; color: #e2e8f0; font-size: 16px; outline: none;
+    }
+    .top button {
+      padding: 10px 16px; background: #fb923c; color: #fff;
+      border: none; border-radius: 8px; cursor: pointer; font-weight: 600;
+      min-width: 44px; height: 40px; display: flex; align-items: center; justify-content: center;
+    }
+    .top button:hover { background: #ea580c; }
     iframe { border: none; width: 100%; height: 100%; background: #fff; }
-    .status { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(15,23,42,0.9); color: #94a3b8; padding: 6px; text-align: center; font-size: 12px; z-index: 99; }
+    .status {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: rgba(15,23,42,0.9); color: #94a3b8;
+      padding: 6px; text-align: center; font-size: 12px; z-index: 99;
+    }
     .light { background: #fff; color: #0f172a; }
     .light .top { background: #f8fafc; border-color: #e2e8f0; }
     .light .top input { background: #f1f5f9; color: #0f172a; }
@@ -19,90 +34,102 @@
 </head>
 <body class="dark">
   <div class="top">
-    <input id="url" placeholder="Введи URL (https://example.com)" value="">
-    <button id="go">Открыть</button>
-<button onclick="window.open(frame.src,'_blank')">Новая вкладка</button>
-    <button onclick="copyLink()">Ссылка</button>
-    <button onclick="toggleTheme()">Тема</button>
+    <input id="url" placeholder="Введи URL (youtube.com)" value="">
+    <button id="go" title="Открыть в iframe">Открыть</button>
+    <button id="newtab" title="Открыть в новой вкладке">Новая вкладка</button>
+    <button onclick="copyLink()" title="Скопировать ссылку">Ссылка</button>
+    <button onclick="toggleTheme()" title="Тема">Тема</button>
   </div>
-  <iframe id="frame"></iframe>
+  <iframe id="frame" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups allow-downloads"></iframe>
   <div class="status">AuraProxy активен — полная анонимность, 0 серверов</div>
+
   <script>
     let key;
     const urlInput = document.getElementById('url');
     const frame = document.getElementById('frame');
     const goBtn = document.getElementById('go');
+    const newTabBtn = document.getElementById('newtab');
 
+    // === Генерация ключа ===
     async function getKey() {
       let h = location.hash.slice(1);
       if (!h) {
         key = await crypto.subtle.generateKey({name:"AES-GCM",length:256},true,["encrypt","decrypt"]);
         const raw = await crypto.subtle.exportKey("raw", key);
-        location.hash = btoa(String.fromCharCode.apply(null, new Uint8Array(raw)));
+        location.hash = btoa(String.fromCharCode(...new Uint8Array(raw)));
       } else {
         try {
           const raw = Uint8Array.from(atob(h), c => c.charCodeAt(0));
           key = await crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["encrypt","decrypt"]);
         } catch(e) {
           alert('Ключ битый — создаём новый');
-          location.hash = '';
-          location.reload();
+          location.hash = ''; location.reload();
         }
       }
     }
 
+    // === Шифрование / Расшифровка ===
     async function encrypt(text) {
       const iv = crypto.getRandomValues(new Uint8Array(12));
       const encrypted = await crypto.subtle.encrypt({name:"AES-GCM", iv}, key, new TextEncoder().encode(text));
       const combined = new Uint8Array(iv.byteLength + encrypted.byteLength);
-      combined.set(new Uint8Array(iv), 0);
-      combined.set(new Uint8Array(encrypted), iv.byteLength);
-      return btoa(String.fromCharCode.apply(null, combined));
+      combined.set(iv, 0); combined.set(new Uint8Array(encrypted), iv.byteLength);
+      return btoa(String.fromCharCode(...combined));
     }
-
-    async function decrypt(encryptedHash) {
+    async function decrypt(hash) {
       try {
-        const binary = atob(encryptedHash);
+        const binary = atob(hash);
         const combined = new Uint8Array(binary.length);
         for (let i = 0; i < binary.length; i++) combined[i] = binary.charCodeAt(i);
         const iv = combined.slice(0, 12);
         const data = combined.slice(12);
         const decrypted = await crypto.subtle.decrypt({name:"AES-GCM", iv}, key, data);
         return new TextDecoder().decode(decrypted);
-      } catch(e) {
-        return '';
-      }
+      } catch(e) { return ''; }
     }
 
-    async function loadSite() {
+    // === Открытие сайта ===
+    async function openSite() {
       let url = urlInput.value.trim();
       if (!url) return;
-      if (!url.startsWith('http')) url = 'https://' + url;
-      const encHash = await encrypt(url);
-      location.hash = encHash;
+      if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+      const enc = await encrypt(url);
+      location.hash = enc;
       frame.src = url;
+      updateNewTabButton(url);
     }
 
+    function updateNewTabButton(url) {
+      newTabBtn.onclick = () => window.open(url, '_blank');
+    }
+
+    // === Загрузка из хеша ===
     async function loadFromHash() {
       if (!location.hash.slice(1)) return;
       const url = await decrypt(location.hash.slice(1));
       if (url) {
         urlInput.value = url;
         frame.src = url;
+        updateNewTabButton(url);
       }
     }
 
+    // === Копировать ссылку ===
     function copyLink() {
       navigator.clipboard.writeText(location.href).then(() => alert('Ссылка скопирована!'));
     }
 
+    // === Тема ===
     function toggleTheme() {
       document.body.classList.toggle('light');
     }
 
-    goBtn.onclick = loadSite;
-    urlInput.addEventListener('keydown', e => { if (e.key === 'Enter') loadSite(); });
+    // === События ===
+    goBtn.onclick = openSite;
+    urlInput.addEventListener('keydown', e => { if (e.key === 'Enter') openSite(); });
     window.addEventListener('hashchange', loadFromHash);
+
+    // === Старт ===
     getKey().then(loadFromHash);
   </script>
 </body>
