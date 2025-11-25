@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Aura Shop — Price Intelligence</title>
+  <title>Aura Shop</title>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
@@ -23,11 +23,6 @@
       display: grid;
       place-items: center;
       cursor: pointer;
-      transition: all 0.3s;
-    }
-    .dropzone:hover, .dropzone.dragover {
-      background: rgba(234, 88, 12, 0.05);
-      transform: scale(1.02);
     }
     .dropzone p {
       color: #ea580c;
@@ -35,108 +30,51 @@
       text-align: center;
       padding: 0 2rem;
     }
-    #result {
-      margin-top: 2rem;
-      width: 100%;
-      max-width: 600px;
-    }
-    .price-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 12px 20px;
-      background: white;
-      border-radius: 12px;
-      margin-bottom: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
-    .price-row strong { color: #ea580c; }
-    .hidden { display: none; }
   </style>
 </head>
 <body>
 
 <div class="dropzone" id="dropzone">
-  <p>📷 Перетащите фото товара<br><small>(JPG, PNG)</small></p>
+  <p>📷 Перетащите фото товара</p>
 </div>
-
-<div id="result" class="hidden"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script>
-  // Загрузка базы цен
-  let prices = [];
-  fetch('prices.json')
-    .then(res => res.json())
-    .then(data => prices = data)
-    .catch(() => {
-      console.warn('prices.json не найден');
-    });
-
   const dropzone = document.getElementById('dropzone');
-  const result = document.getElementById('result');
 
-  dropzone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    dropzone.classList.add('dragover');
-  });
-
-  dropzone.addEventListener('dragleave', () => {
-    dropzone.classList.remove('dragover');
-  });
-
+  dropzone.addEventListener('dragover', (e) => e.preventDefault());
   dropzone.addEventListener('drop', async (e) => {
     e.preventDefault();
-    dropzone.classList.remove('dragover');
     const file = e.dataTransfer.files[0];
     if (!file || !file.type.match('image.*')) return;
-    processImage(file);
+    
+    dropzone.innerHTML = '<p>🔍 Ищу цены…</p>';
+    
+    try {
+      const {  { text } } = await Tesseract.recognize(file, 'rus+eng');
+      const clean = text.replace(/[^a-zA-Zа-яА-Я0-9\s]/g, ' ').trim();
+      
+      if (clean) {
+        // Открываем Яндекс и Google одновременно
+        window.open(`https://yandex.ru/search/?text=${encodeURIComponent(clean + ' цена')}`, '_blank');
+        window.open(`https://www.google.com/search?q=${encodeURIComponent(clean + ' цена')}`, '_blank');
+        dropzone.innerHTML = '<p>✅ Цены открыты в поиске!</p>';
+      } else {
+        dropzone.innerHTML = '<p>❌ Не найдено. Попробуйте другое фото.</p>';
+      }
+    } catch (err) {
+      dropzone.innerHTML = '<p>❌ Ошибка.</p>';
+    }
   });
 
+  // Клик = выбор файла
   dropzone.addEventListener('click', () => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    input.onchange = (e) => processImage(e.target.files[0]);
+    input.onchange = (e) => dropzone.dispatchEvent(new DragEvent('drop', { dataTransfer: { files: e.target.files } }));
     input.click();
   });
-
-  async function processImage(file) {
-    dropzone.innerHTML = '<p>🔍 Распознаю текст…</p>';
-    try {
-      const {  { text } } = await Tesseract.recognize(file, 'rus+eng');
-      console.log('Распознано:', text);
-
-      // Поиск по базе
-      const query = text.toLowerCase();
-      const found = prices.find(item =>
-        item.name.toLowerCase().includes(query) ||
-        item.article.toLowerCase().includes(query)
-      );
-
-      if (found) {
-        result.innerHTML = '';
-        // Основное название
-        const header = document.createElement('div');
-        header.className = 'price-row';
-        header.innerHTML = `<span><strong>${found.name}</strong></span><span></span>`;
-        result.appendChild(header);
-        // Цены
-        found.prices.forEach(p => {
-          const row = document.createElement('div');
-          row.className = 'price-row';
-          row.innerHTML = `<span>${p.store}</span><strong>${p.price} ₽</strong>`;
-          result.appendChild(row);
-        });
-        result.classList.remove('hidden');
-        dropzone.innerHTML = '<p>✅ Готово! Цены найдены.</p>';
-      } else {
-        dropzone.innerHTML = '<p>❌ Товар не найден. Попробуйте другое фото.</p>';
-      }
-    } catch (err) {
-      console.error(err);
-      dropzone.innerHTML = '<p>❌ Ошибка распознавания.</p>';
-    }
-  }
 </script>
 </body>
 </html>
