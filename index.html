@@ -1,163 +1,86 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Aura Office</title>
+  <title>AURASYSTEM</title>
+  <meta name="description" content="Privacy-native tools. No servers. No accounts. Full control.">
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
       font-family: system-ui, sans-serif;
-      background: #fff7ed;
-      height: 100vh;
-      overflow: hidden;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
       display: grid;
       place-items: center;
+      text-align: center;
+      padding: 2rem;
       position: relative;
     }
     .logo {
-      position: absolute; top: 20px; left: 24px; width: 40px; height: 40px;
-      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg " viewBox="0 0 512 512"><rect width="512" height="512" fill="white"/><path d="M256 100 L300 220 L420 240 L320 280 L300 400 L212 400 L192 280 L92 240 L212 220 Z" fill="%23fb923c"/><path d="M256 140 L290 200 L380 215 L310 245 L295 335 L217 335 L202 245 L122 215 L212 200 Z" fill="%23fed7aa"/><text x="256" y="480" text-anchor="middle" font-family="system-ui" font-size="50" fill="%230f172a">Aura</text></svg>') center/contain no-repeat;
-      background-size: 38px; padding: 12px; border-radius: 16px; box-shadow: 0 6px 20px rgba(251,146,60,0.3); z-index: 999; opacity: 0.5; animation: pulse 4s ease-in-out infinite; cursor: pointer;
+      font-size: 5rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, #fb923c, #f97316);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 1.5rem;
     }
-    .logo:hover { animation: none; opacity: 1; transform: scale(1.2); box-shadow: 0 8px 30px rgba(251,146,60,0.5); }
-    @keyframes pulse { 0% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.05); } 100% { opacity: 0.5; transform: scale(1); } }
-    #welcome { text-align: center; }
-    #welcome h1 { font-size: 5rem; color: #ea580c; }
-    #welcome button { padding: 1.4rem 4rem; font-size: 1.7rem; background: #ea580c; color: white; border: none; border-radius: 999px; cursor: pointer; margin-top: 1.5rem; }
-    #editor-screen { display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: white; }
-    #editor { 
-      width: 100%; 
-      height: calc(100% - 60px); 
-      padding: 2rem; 
-      outline: none; 
-      -webkit-user-select: text;  /* Для Chrome/Safari */
-      user-select: text;
+    h1 {
+      font-size: 1.6rem;
+      color: #cbd5e1;
+      margin-bottom: 2.5rem;
     }
-    .topbar {
-      height: 60px; background: white; border-bottom: 1px solid #eee;
-      padding: 0 1rem; display: flex; gap: 10px; align-items: center;
-      position: fixed; top: 0; left: 0; right: 0; z-index: 99;
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      align-items: center;
     }
-    .topbar button {
-      padding: 8px 14px; background: #fb923c; color: white;
-      border: none; border-radius: 6px; cursor: pointer;
+    .btn {
+      display: inline-block;
+      color: white;
+      padding: 0.8rem 2rem;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 600;
+      min-width: 240px;
     }
-    .status {
-      position: fixed; bottom: 0; left: 0; right: 0;
-      background: rgba(255,255,255,0.95); padding: 10px; text-align: center;
-      color: #555; font-size: 13px;
+    .editor { background: #ea580c; }
+    .editor:hover { background: #c2410c; }
+    .shop { background: #3b82f6; }
+    .shop:hover { background: #2563eb; }
+    .proxy { background: #8b5cf6; }
+    .proxy:hover { background: #7c3aed; }
+
+    /* Мерцающая надпись внизу справа */
+    .footer {
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
+      font-size: 12px;
+      color: #64748b;
+      opacity: 0.5;
+      animation: subtle-pulse 5s ease-in-out infinite;
     }
-    .dark { 
-      background: #0f172a; color: #e2e8f0; 
-    }
-    .dark #editor { background: #1e293b; color: #e2e8f0; }
-    .dark .topbar { background: #1e293b; border-color: #334155; }
-    .dark .status { background: rgba(30,41,59,0.95); color: #94a3b8; }
-    @media (max-width: 768px) { 
-      .topbar { padding: 0 0.5rem; gap: 5px; } 
-      .topbar button { padding: 6px 10px; font-size: 12px; } 
-      #welcome h1 { font-size: 3rem; } 
+    @keyframes subtle-pulse {
+      0%   { opacity: 0.4; }
+      50%  { opacity: 0.7; }
+      100% { opacity: 0.4; }
     }
   </style>
 </head>
 <body>
-
-<div class="logo" title="Aura"></div>
-
-<div id="welcome">
-  <h1>Aura</h1>
-  <p>Приватный редактор с end-to-end шифрованием</p>
-  <button id="start">Создать документ →</button>
-</div>
-
-<div id="editor-screen">
-  <div class="topbar">
-    <button data-cmd="bold">Ж</button>
-    <button data-cmd="italic">К</button>
-    <button data-cmd="underline">П</button>
-    <button data-cmd="strike">Зач</button>
-    <button data-cmd="bulletList">•</button>
-    <button data-cmd="orderedList">1.</button>
-    <button data-cmd="insertTable">Таблица</button>
-    <button onclick="copyLink()">🔗 Ссылка</button>
-    <button onclick="toggleDarkMode()">🌙 Тема</button>
+  <div>
+    <div class="logo">AURASYSTEM</div>
+    <h1>Privacy-native tools.<br>No servers. No accounts. Full control.</h1>
+    <div class="btn-group">
+      <a href="/editor/" class="btn editor">Aura Editor →</a>
+      <a href="/shop/" class="btn shop">Aura Shop →</a>
+      <a href="/proxy/" class="btn proxy">Aura Proxy →</a>
+    </div>
   </div>
-  <div id="editor" contenteditable="true">Начните писать…</div>
-  <div class="status">Защищённая комната активна — шифрование AES-256-GCM</div>
-</div>
-
-<script>
-let key;
-
-async function getKey() {
-  let h = location.hash.slice(1);
-  if (!h) {
-    key = await crypto.subtle.generateKey({name:"AES-GCM",length:256},true,["encrypt","decrypt"]);
-    const raw = await crypto.subtle.exportKey("raw", key);
-    location.hash = btoa(String.fromCharCode.apply(null, new Uint8Array(raw)));
-  } else {
-    const raw = Uint8Array.from(atob(h), c => c.charCodeAt(0));
-    key = await crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["encrypt","decrypt"]);
-  }
-}
-
-async function save() {
-  if (!key) return;
-  const text = document.getElementById('editor').innerHTML;
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const encrypted = await crypto.subtle.encrypt({name:"AES-GCM", iv}, key, new TextEncoder().encode(text));
-  localStorage.setItem('aura_doc_' + location.hash, JSON.stringify({
-    iv: Array.from(iv),
-    data: Array.from(new Uint8Array(encrypted))
-  }));
-}
-
-async function load() {
-  const saved = localStorage.getItem('aura_doc_' + location.hash);
-  if (saved) {
-    const {iv, data} = JSON.parse(saved);
-    const decrypted = await crypto.subtle.decrypt({name:"AES-GCM", iv:new Uint8Array(iv)}, key, new Uint8Array(data));
-    document.getElementById('editor').innerHTML = new TextDecoder().decode(decrypted);
-  }
-}
-
-function copyLink() {
-  navigator.clipboard.writeText(location.href).then(() => alert('Ссылка скопирована!'));
-}
-
-function toggleDarkMode() {
-  document.body.classList.toggle('dark');
-  document.getElementById('editor').classList.toggle('dark');
-}
-
-document.querySelectorAll('[data-cmd]').forEach(btn => {
-  btn.onclick = () => {
-    const cmd = btn.dataset.cmd;
-    if (cmd === 'insertTable') {
-      const table = '<table border="1" style="border-collapse:collapse;width:100%"><tbody><tr><td>ячейка</td><td>ячейка</td></tr><tr><td> </td><td> </td></tr></tbody></table><p><br></p>';
-      document.execCommand('insertHTML', false, table);
-    } else {
-      document.execCommand(cmd, false, null);
-    }
-    save();
-  };
-});
-
-async function startEditor() {
-  await getKey();
-  document.getElementById('welcome').style.display = 'none';
-  document.getElementById('editor-screen').style.display = 'block';
-  await load();
-  document.getElementById('editor').focus();  // Фокус для Chrome и мобильки
-  setInterval(save, 8000);
-}
-
-document.getElementById('start').onclick = startEditor;
-
-if (location.hash) {
-  startEditor();
-}
-</script>
+  <div class="footer">Produced by Mihelson™ © 2025</div>
 </body>
 </html>
