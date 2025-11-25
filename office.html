@@ -103,7 +103,11 @@ async function startEditor() {
   await load();
   const editor = document.getElementById('editor');
   editor.focus();
-  editor.setSelectionRange(0, 0); // Фикс для Chrome
+  // Надёжный фокус для всех браузеров
+  setTimeout(() => {
+    editor.focus();
+    if (document.activeElement !== editor) editor.click();
+  }, 150);
   setInterval(save, 8000);
 }
 document.getElementById('start').onclick = startEditor;
