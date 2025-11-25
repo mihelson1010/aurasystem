@@ -16,18 +16,56 @@
     #welcome button { padding: 1.4rem 4rem; font-size: 1.7rem; background: #ea580c; color: white; border: none; border-radius: 999px; cursor: pointer; margin-top: 1.5rem; }
     #editor-screen { display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: white; }
     #editor { width: 100%; height: calc(100% - 60px); padding: 2rem; outline: none; user-select: text; caret-color: #ea580c; line-height: 1.6; }
-    .topbar { height: 60px; background: white; border-bottom: 1px solid #eee; padding: 0 1rem; display: flex; gap: 8px; align-items: center; position: fixed; top: 0; left: 0; right: 0; z-index: 99; overflow-x: auto; white-space: nowrap; }
-    .topbar button { padding: 8px 12px; background: #fb923c; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; }
+    
+    /* === ТУЛБАР — РОВНО ПО ВСЕЙ ШИРИНЕ === */
+    .topbar {
+      height: 60px;
+      background: white;
+      border-bottom: 1px solid #eee;
+      padding: 0 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 99;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+    .toolbar-group {
+      display: flex;
+      gap: 8px;
+    }
+    .topbar button {
+      min-width: 44px;
+      height: 40px;
+      padding: 0 12px;
+      background: #fb923c;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .topbar button:hover { background: #ea580c; transform: translateY(-1px); }
+    
     .status { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); padding: 8px; text-align: center; color: #555; font-size: 13px; }
     .dark { background: #0f172a; color: #e2e8f0; }
     .dark #editor { background: #1e293b; color: #e2e8f0; }
     .dark .topbar { background: #1e293b; border-color: #334155; }
     .dark .status { background: rgba(30,41,59,0.95); color: #94a3b8; }
+    .dark .topbar button { background: #fb923c; }
+    .dark .topbar button:hover { background: #fd9749; }
+
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 999; justify-content: center; align-items: center; }
     .modal-content { background: white; padding: 2rem; border-radius: 16px; text-align: center; max-width: 90%; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
     .dark .modal-content { background: #1e293b; color: #e2e8f0; }
     #qr-canvas { margin: 1rem 0; }
-    .share-btn { display: inline-flex; align-items: center; gap: 6px; margin: 0 4px; }
   </style>
 </head>
 <body>
@@ -41,24 +79,44 @@
 
   <div id="editor-screen">
     <div class="topbar">
-      <button data-cmd="bold" title="Жирный">Ж</button>
-      <button data-cmd="italic" title="Курсив">К</button>
-      <button data-cmd="underline" title="Подчёркивание">П</button>
-      <button data-cmd="strikeThrough" title="Зачёркивание">Зач</button>
-      <button data-cmd="insertUnorderedList" title="Список">•</button>
-      <button data-cmd="insertOrderedList" title="Нумерованный">1.</button>
-      <button data-cmd="justifyLeft" title="По левому краю">Л</button>
-      <button data-cmd="justifyCenter" title="По центру">Ц</button>
-      <button data-cmd="justifyRight" title="По правому краю">П</button>
-      <button data-cmd="insertTable" title="Таблица">Таблица</button>
-      <button onclick="exportPDF()" title="Экспорт PDF">PDF</button>
-      <button onclick="exportHTML()" title="Экспорт HTML">HTML</button>
-      <button onclick="importHTML()" title="Импорт HTML">Импорт</button>
-      <button onclick="printDoc()" title="Печать">Печать</button>
-      <button onclick="showQR()" title="QR-код">QR</button>
-      <button onclick="shareMenu()" title="Поделиться">Поделиться</button>
-      <button onclick="toggleDark()" title="Тема">Тема</button>
+      <!-- Форматирование текста -->
+      <div class="toolbar-group">
+        <button data-cmd="bold" title="Жирный">Ж</button>
+        <button data-cmd="italic" title="Курсив">К</button>
+        <button data-cmd="underline" title="Подчёркивание">П</button>
+        <button data-cmd="strikeThrough" title="Зачёркивание">Зач</button>
+      </div>
+
+      <!-- Выравнивание и списки -->
+      <div class="toolbar-group">
+        <button data-cmd="insertUnorderedList" title="Маркированный список">•</button>
+        <button data-cmd="insertOrderedList" title="Нумерованный список">1.</button>
+        <button data-cmd="justifyLeft" title="По левому краю">Л</button>
+        <button data-cmd="justifyCenter" title="По центру">Ц</button>
+        <button data-cmd="justifyRight" title="По правому краю">П</button>
+      </div>
+
+      <!-- Таблица -->
+      <div class="toolbar-group">
+        <button data-cmd="insertTable" title="Вставить таблицу">Таблица</button>
+      </div>
+
+      <!-- Экспорт / Импорт -->
+      <div class="toolbar-group">
+        <button onclick="exportPDF()" title="Экспорт в PDF">PDF</button>
+        <button onclick="exportHTML()" title="Экспорт в HTML">HTML</button>
+        <button onclick="importHTML()" title="Импорт HTML">Импорт</button>
+        <button onclick="printDoc()" title="Печать">Печать</button>
+      </div>
+
+      <!-- Обмен -->
+      <div class="toolbar-group">
+        <button onclick="showQR()" title="QR-код с шифрованием">QR</button>
+        <button onclick="shareMenu()" title="Поделиться">Поделиться</button>
+        <button onclick="toggleDark()" title="Тема">Тема</button>
+      </div>
     </div>
+
     <div id="editor" contenteditable="true">Начните писать...</div>
     <div class="status">Защищённая комната активна — шифрование AES-256-GCM</div>
   </div>
@@ -69,7 +127,7 @@
       <h3>Поделитесь документом</h3>
       <div id="qr-canvas"></div>
       <p><small>Отсканируйте QR или скопируйте ссылку</small></p>
-      <button onclick="closeModal()" style="margin-top:1rem;padding:0.5rem 1rem;">Закрыть</button>
+      <button onclick="closeModal()" style="margin-top:1rem;padding:0.5rem 1rem;background:#fb923c;color:white;border:none;border-radius:6px;cursor:pointer;">Закрыть</button>
     </div>
   </div>
 
@@ -77,7 +135,7 @@
     let key;
     const { jsPDF } = window.jspdf;
 
-    // --- Шифрование ---
+    // === Шифрование ===
     async function getKey() {
       let h = location.hash.slice(1);
       if (!h) {
@@ -95,7 +153,7 @@
       }
     }
 
-    // --- Сохранение / Загрузка ---
+    // === Сохранение / Загрузка ===
     async function save() {
       if (!key) return;
       const text = document.getElementById('editor').innerHTML;
@@ -116,7 +174,7 @@
       }
     }
 
-    // --- Тулбар ---
+    // === Тулбар ===
     document.querySelectorAll('[data-cmd]').forEach(btn => {
       btn.onclick = () => {
         const cmd = btn.dataset.cmd;
@@ -129,15 +187,16 @@
       };
     });
 
-    // --- QR-код ---
+    // === QR-код ===
     function showQR() {
       const modal = document.getElementById('qr-modal');
       const canvas = document.getElementById('qr-canvas');
       canvas.innerHTML = '';
       new QRCode(canvas, {
         text: location.href,
-        width: 200, height: 200,
-        colorDark: "#0f172a", colorLight: "#ffffff"
+        width: 220, height: 220,
+        colorDark: document.body.classList.contains('dark') ? "#e2e8f0" : "#0f172a",
+        colorLight: document.body.classList.contains('dark') ? "#1e293b" : "#ffffff"
       });
       modal.style.display = 'flex';
     }
@@ -145,25 +204,26 @@
       document.getElementById('qr-modal').style.display = 'none';
     }
 
-    // --- Экспорт PDF ---
+    // === Экспорт PDF ===
     function exportPDF() {
-      const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
       const text = document.getElementById('editor').innerText;
-      doc.text(text, 10, 10);
+      const splitText = doc.splitTextToSize(text, 180);
+      doc.text(splitText, 15, 20);
       doc.save('aura-document.pdf');
     }
 
-    // --- Экспорт HTML ---
+    // === Экспорт HTML ===
     function exportHTML() {
-      const html = `<html><head><meta charset="UTF-8"><title>Aura Document</title></head><body>${document.getElementById('editor').innerHTML}</body></html>`;
+      const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Aura Document</title></head><body>${document.getElementById('editor').innerHTML}</body></html>`;
       const blob = new Blob([html], {type: 'text/html'});
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url; a.download = 'aura-document.html'; a.click();
+      URL.revokeObjectURL(url);
     }
 
-    // --- Импорт HTML ---
+    // === Импорт HTML ===
     function importHTML() {
       const input = document.createElement('input');
       input.type = 'file';
@@ -174,7 +234,7 @@
         reader.onload = ev => {
           const parser = new DOMParser();
           const doc = parser.parseFromString(ev.target.result, 'text/html');
-          document.getElementById('editor').innerHTML = doc.body.innerHTML;
+          document.getElementById('editor').innerHTML = doc.body.innerHTML || doc.documentElement.outerHTML;
           save();
         };
         reader.readAsText(file);
@@ -182,10 +242,10 @@
       input.click();
     }
 
-    // --- Печать ---
+    // === Печать ===
     function printDoc() { window.print(); }
 
-    // --- Поделиться ---
+    // === Поделиться ===
     function shareMenu() {
       const url = encodeURIComponent(location.href);
       const text = encodeURIComponent("Мой зашифрованный документ в Aura Office");
@@ -196,19 +256,17 @@
         {name: 'X', icon: 'X', url: `https://twitter.com/intent/tweet?text=${text}&url=${url}`},
         {name: 'VK', icon: 'VK', url: `https://vk.com/share.php?url=${url}&title=${text}`}
       ];
-      const menu = links.map(l => 
-        `<a href="${l.url}" target="_blank" class="share-btn" style="color:#fb923c;text-decoration:none;">${l.icon} ${l.name}</a>`
-      ).join('');
-      alert("Поделиться:\n\n" + links.map(l => `${l.icon} ${l.name}: ${l.url}`).join('\n'));
+      const message = links.map(l => `${l.icon} ${l.name}: ${l.url}`).join('\n\n');
+      alert("Поделиться:\n\n" + message);
     }
 
-    // --- Тема ---
+    // === Тема ===
     function toggleDark() {
       document.body.classList.toggle('dark');
       document.getElementById('editor').classList.toggle('dark');
     }
 
-    // --- Запуск ---
+    // === Запуск ===
     async function startEditor() {
       await getKey();
       document.getElementById('welcome').style.display = 'none';
