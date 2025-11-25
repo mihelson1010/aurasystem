@@ -3,49 +3,73 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AuraProxy</title>
+  <title>AuraProxy 2.0</title>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; height: 100vh; display: grid; grid-template-rows: auto 1fr; overflow: hidden; }
-    .top { height: 60px; background: #1e293b; border-bottom: 1px solid #334155; padding: 0 1.5rem; display: flex; align-items: center; gap: 12px; }
-    .top input { flex: 1; padding: 12px 16px; background: #334155; border: none; border-radius: 8px; color: #e2e8f0; font-size: 16px; outline: none; }
-    .top button { padding: 10px 16px; background: #fb923c; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; min-width: 44px; height: 40px; }
-    iframe { border: none; width: 100%; height: 100%; background: #fff; }
-    .status { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(15,23,42,0.9); color: #94a3b8; padding: 6px; text-align: center; font-size: 12px; }
+    body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; height: 100vh; display: grid; place-items: center; text-align: center; }
+    .container { max-width: 600px; padding: 2rem; }
+    input { width: 100%; padding: 12px; background: #334155; border: none; border-radius: 8px; color: #e2e8f0; font-size: 16px; margin-bottom: 1rem; }
+    button { padding: 12px 24px; background: #fb923c; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; margin: 0 0.5rem; }
+    button:hover { background: #ea580c; }
+    .status { margin-top: 2rem; font-size: 14px; color: #94a3b8; }
+    .light { background: #fff; color: #0f172a; }
+    .light input { background: #f1f5f9; color: #0f172a; }
   </style>
 </head>
-<body>
-  <div class="top">
-    <input id="url" placeholder="youtube.com" value="https://youtube.com">
+<body class="dark">
+  <div class="container">
+    <h1>AuraProxy 2.0</h1>
+    <p>Введи URL — открою анонимно</p>
+    <input id="url" placeholder="youtube.com" value="">
+    <br>
     <button onclick="openSite()">Открыть</button>
     <button onclick="openNewTab()">Новая вкладка</button>
+    <button onclick="copyLink()">Скопировать ссылку</button>
+    <br>
+    <div class="status" id="status">Готов к работе — 0 серверов</div>
   </div>
-  <iframe id="frame" src="https://youtube.com"></iframe>
-  <div class="status">AuraProxy — работает 100%</div>
 
   <script>
     const urlInput = document.getElementById('url');
-    const frame = document.getElementById('frame');
+    const status = document.getElementById('status');
 
     function openSite() {
       let url = urlInput.value.trim();
-      if (!url) return;
+      if (!url) { alert('Введи URL!'); return; }
       if (!url.startsWith('http')) url = 'https://' + url;
-      frame.src = url;
+      status.textContent = 'Открываю ' + url + ' анонимно...';
+      window.location.href = url;  // Redirect — полная анонимность
     }
 
     function openNewTab() {
       let url = urlInput.value.trim();
-      if (!url) return;
+      if (!url) { alert('Введи URL!'); return; }
       if (!url.startsWith('http')) url = 'https://' + url;
+      status.textContent = 'Открываю ' + url + ' в новой вкладке...';
       window.open(url, '_blank');
     }
 
-    urlInput.addEventListener('keydown', e => {
-      if (e.key === 'Enter') openSite();
-    });
+    function copyLink() {
+      let url = urlInput.value.trim();
+      if (!url) { alert('Введи URL!'); return; }
+      if (!url.startsWith('http')) url = 'https://' + url;
+      const fullLink = location.origin + location.pathname + '?url=' + btoa(url);  // Зашифрованный URL
+      navigator.clipboard.writeText(fullLink).then(() => {
+        status.textContent = 'Ссылка скопирована: ' + fullLink;
+      });
+    }
 
-    openSite();
+    // Автооткрытие из параметров
+    const params = new URLSearchParams(location.search);
+    const encodedUrl = params.get('url');
+    if (encodedUrl) {
+      const url = atob(encodedUrl);
+      urlInput.value = url;
+      status.textContent = 'Загружаю ' + url + ' из ссылки...';
+      setTimeout(openNewTab, 1000);
+    }
+
+    urlInput.addEventListener('keydown', e => { if (e.key === 'Enter') openSite(); });
   </script>
 </body>
 </html>
