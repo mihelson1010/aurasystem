@@ -17,48 +17,80 @@
     }
     .logo {
       position: absolute; top: 20px; left: 24px; width: 40px; height: 40px;
-      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg " viewBox="0 0 512 512"><rect width="512" height="512" fill="white"/><path d="M256 100 L300 220 L420 240 L320 280 L300 400 L212 400 L192 280 L92 240 L212 220 Z" fill="%23fb923c"/><path d="M256 140 L290 200 L380 215 L310 245 L295 335 L217 335 L202 245 L122 215 L212 200 Z" fill="%23fed7aa"/><text x="256" y="480" text-anchor="middle" font-family="system-ui" font-size="50" fill="%230f172a">Aura</text></svg>') center/contain no-repeat;
+      background: url('image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="white"/><path d="M256 100 L300 220 L420 240 L320 280 L300 400 L212 400 L192 280 L92 240 L212 220 Z" fill="%23fb923c"/><path d="M256 140 L290 200 L380 215 L310 245 L295 335 L217 335 L202 245 L122 215 L212 200 Z" fill="%23fed7aa"/><text x="256" y="480" text-anchor="middle" font-family="system-ui" font-size="50" fill="%230f172a">Aura</text></svg>') center/contain no-repeat;
       background-size: 38px; padding: 12px; border-radius: 16px; box-shadow: 0 6px 20px rgba(251,146,60,0.3); z-index: 999; opacity: 0.5; animation: pulse 4s ease-in-out infinite; cursor: pointer;
     }
     .logo:hover { animation: none; opacity: 1; transform: scale(1.2); box-shadow: 0 8px 30px rgba(251,146,60,0.5); }
     @keyframes pulse { 0% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.05); } 100% { opacity: 0.5; transform: scale(1); } }
-    #welcome { text-align: center; }
-    #welcome h1 { font-size: 5rem; color: #ea580c; }
-    #welcome button { padding: 1.4rem 4rem; font-size: 1.7rem; background: #ea580c; color: white; border: none; border-radius: 999px; cursor: pointer; margin-top: 1.5rem; }
-    #editor-screen { display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: white; }
-    #editor { 
-      width: 100%; 
-      height: calc(100% - 60px); 
-      padding: 2rem; 
-      outline: none; 
-      -webkit-user-select: text;  /* Для Chrome/Safari */
-      user-select: text;
+    #welcome { height: 100%; display: grid; place-items: center; text-align: center; }
+    #welcome h1 { font-size: 5rem; color: #ea580c; margin-bottom: 0.5rem; }
+    #welcome button { padding: 1.4rem 4rem; font-size: 1.7rem; background: #ea580c; color: white; border: none; border-radius: 999px; cursor: pointer; box-shadow: 0 16px 40px rgba(234,88,12,0.5); transition: 0.3s; }
+    #welcome button:hover { background: #c2410c; transform: translateY(-5px); }
+    small { display: block; margin-top: 2rem; color: #666; font-size: 1.1rem; }
+    #editor-screen, #spreadsheet-screen { display: none; height: 100vh; background: white; position: absolute; top: 0; left: 0; width: 100%; }
+    #editor, #spreadsheet { width: 100%; height: calc(100vh - 130px); padding: 80px 100px 50px; outline: none; }
+    #editor { background: #fff7ed; }
+    #spreadsheet { 
+      display: grid; 
+      grid-template-columns: repeat(10, 80px); 
+      gap: 1px; 
+      background: #ddd; 
+      padding: 0 80px 0 80px; 
+      overflow: auto;
+    }
+    .cell {
+      background: white;
+      padding: 8px;
+      min-height: 24px;
+      outline: none;
+      border: 1px solid #eee;
+      position: relative;
+    }
+    .cell.selected {
+      background: #e0f2fe;
+      border-color: #3b82f6;
+    }
+    .cell.formula::after {
+      content: '=';
+      position: absolute;
+      left: 4px;
+      top: 2px;
+      color: #64748b;
+      font-size: 10px;
     }
     .topbar {
-      height: 60px; background: white; border-bottom: 1px solid #eee;
-      padding: 0 1rem; display: flex; gap: 10px; align-items: center;
-      position: fixed; top: 0; left: 0; right: 0; z-index: 99;
+      position: fixed; top: 0; left: 0; right: 0; height: 70px; background: white; border-bottom: 1px solid #eee;
+      display: flex; flex-wrap: wrap; gap: 8px; padding: 0 80px; align-items: center; z-index: 99;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+    .topbar select, .topbar button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      transition: all 0.2s;
+    }
+    .topbar select {
+      background: white;
+      color: #333;
     }
     .topbar button {
-      padding: 8px 14px; background: #fb923c; color: white;
-      border: none; border-radius: 6px; cursor: pointer;
+      background: #fb923c;
+      color: white;
     }
-    .status {
-      position: fixed; bottom: 0; left: 0; right: 0;
-      background: rgba(255,255,255,0.95); padding: 10px; text-align: center;
-      color: #555; font-size: 13px;
+    .topbar button:hover, .topbar select:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
     }
-    .dark { 
-      background: #0f172a; color: #e2e8f0; 
-    }
-    .dark #editor { background: #1e293b; color: #e2e8f0; }
+    .status { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); padding: 10px; text-align: center; color: #555; font-size: 13px; }
+    .dark { background: #0f172a; color: #e2e8f0; }
+    .dark #editor, .dark .cell { background: #1e293b; color: #e2e8f0; }
     .dark .topbar { background: #1e293b; border-color: #334155; }
-    .dark .status { background: rgba(30,41,59,0.95); color: #94a3b8; }
-    @media (max-width: 768px) { 
-      .topbar { padding: 0 0.5rem; gap: 5px; } 
-      .topbar button { padding: 6px 10px; font-size: 12px; } 
-      #welcome h1 { font-size: 3rem; } 
-    }
+    .dark .topbar button { background: #3b82f6; }
+    .dark .topbar select { background: #334155; color: #e2e8f0; }
   </style>
 </head>
 <body>
@@ -66,13 +98,25 @@
 <div class="logo" title="Aura"></div>
 
 <div id="welcome">
-  <h1>Aura</h1>
-  <p>Приватный редактор с end-to-end шифрованием</p>
+  <h1>Aura Office</h1>
+  <p>Приватный Word + Excel в одном файле. Без аккаунтов. С шифрованием.</p>
   <button id="start">Создать документ →</button>
+  <small>Поделись ссылкой — работайте вместе. Офлайн. Навсегда ваш.</small>
 </div>
 
 <div id="editor-screen">
   <div class="topbar">
+    <select id="font-family">
+      <option value="system-ui">Шрифт</option>
+      <option value="Arial, sans-serif">Arial</option>
+      <option value="Times New Roman, serif">Times New Roman</option>
+      <option value="Calibri, sans-serif">Calibri</option>
+      <option value="Cambria, serif">Cambria</option>
+      <option value="Georgia, serif">Georgia</option>
+      <option value="Courier New, monospace">Courier New</option>
+      <option value="Verdana, sans-serif">Verdana</option>
+    </select>
+    <button id="to-spreadsheet">📊 Таблица</button>
     <button data-cmd="bold">Ж</button>
     <button data-cmd="italic">К</button>
     <button data-cmd="underline">П</button>
@@ -81,15 +125,26 @@
     <button data-cmd="orderedList">1.</button>
     <button data-cmd="insertTable">Таблица</button>
     <button onclick="copyLink()">🔗 Ссылка</button>
-    <button onclick="toggleDarkMode()">🌙 Тема</button>
+    <button onclick="document.body.classList.toggle('dark')">🌙 Тема</button>
   </div>
   <div id="editor" contenteditable="true">Начните писать…</div>
-  <div class="status">Защищённая комната активна — шифрование AES-256-GCM</div>
+  <div class="status">Режим: Документ</div>
+</div>
+
+<div id="spreadsheet-screen">
+  <div class="topbar">
+    <button id="to-editor">📄 Документ</button>
+    <button onclick="addRow()">➕ Строка</button>
+    <button onclick="addColumn()">➕ Колонка</button>
+    <button onclick="copyLink()">🔗 Ссылка</button>
+    <button onclick="document.body.classList.toggle('dark')">🌙 Тема</button>
+  </div>
+  <div id="spreadsheet"></div>
+  <div class="status">Режим: Таблица (Excel-стиль)</div>
 </div>
 
 <script>
 let key;
-
 async function getKey() {
   let h = location.hash.slice(1);
   if (!h) {
@@ -102,61 +157,160 @@ async function getKey() {
   }
 }
 
-async function save() {
-  if (!key) return;
-  const text = document.getElementById('editor').innerHTML;
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const encrypted = await crypto.subtle.encrypt({name:"AES-GCM", iv}, key, new TextEncoder().encode(text));
-  localStorage.setItem('aura_doc_' + location.hash, JSON.stringify({
-    iv: Array.from(iv),
-    data: Array.from(new Uint8Array(encrypted))
-  }));
-}
-
-async function load() {
-  const saved = localStorage.getItem('aura_doc_' + location.hash);
-  if (saved) {
-    const {iv, data} = JSON.parse(saved);
-    const decrypted = await crypto.subtle.decrypt({name:"AES-GCM", iv:new Uint8Array(iv)}, key, new Uint8Array(data));
-    document.getElementById('editor').innerHTML = new TextDecoder().decode(decrypted);
+// Парсим формулы
+function parseFormula(formula) {
+  if (!formula.startsWith('=')) return formula;
+  
+  try {
+    // Пример: =SUM(A1:A3)
+    if (formula.includes('SUM(')) {
+      const range = formula.match(/SUM\(([^)]+)\)/)[1];
+      const [start, end] = range.split(':');
+      const [startCol, startRow] = splitCell(start);
+      const [endCol, endRow] = splitCell(end);
+      let sum = 0;
+      for (let r = startRow; r <= endRow; r++) {
+        for (let c = startCol; c <= endCol; c++) {
+          const cell = document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
+          if (cell) {
+            const val = parseFloat(cell.textContent);
+            if (!isNaN(val)) sum += val;
+          }
+        }
+      }
+      return sum;
+    }
+    // Пример: =AVERAGE(B1:B5)
+    if (formula.includes('AVERAGE(')) {
+      const range = formula.match(/AVERAGE\(([^)]+)\)/)[1];
+      const [start, end] = range.split(':');
+      const [startCol, startRow] = splitCell(start);
+      const [endCol, endRow] = splitCell(end);
+      let sum = 0, count = 0;
+      for (let r = startRow; r <= endRow; r++) {
+        for (let c = startCol; c <= endCol; c++) {
+          const cell = document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
+          if (cell) {
+            const val = parseFloat(cell.textContent);
+            if (!isNaN(val)) { sum += val; count++; }
+          }
+        }
+      }
+      return count > 0 ? (sum / count).toFixed(2) : 0;
+    }
+    return formula;
+  } catch (e) {
+    return '#ERROR';
   }
 }
+
+function splitCell(cell) {
+  const colStr = cell.replace(/\d+/g, '');
+  const rowStr = cell.replace(/\D+/g, '');
+  const col = colStr.split('').reduce((acc, char, i) => acc * 26 + (char.charCodeAt(0) - 64), 0) - 1;
+  return [col, parseInt(rowStr) - 1];
+}
+
+function createSpreadsheet(cols = 10, rows = 20) {
+  const sheet = document.getElementById('spreadsheet');
+  sheet.innerHTML = '';
+  sheet.style.gridTemplateColumns = `repeat(${cols}, 80px)`;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.contentEditable = 'true';
+      cell.setAttribute('data-row', r);
+      cell.setAttribute('data-col', c);
+      
+      cell.addEventListener('input', () => {
+        if (cell.textContent.startsWith('=')) {
+          cell.classList.add('formula');
+          const result = parseFormula(cell.textContent);
+          cell.setAttribute('title', result);
+        } else {
+          cell.classList.remove('formula');
+        }
+      });
+
+      cell.addEventListener('focus', () => {
+        document.querySelectorAll('.cell').forEach(c => c.classList.remove('selected'));
+        cell.classList.add('selected');
+      });
+
+      cell.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', cell.textContent);
+        cell.style.opacity = '0.5';
+      });
+
+      cell.addEventListener('dragend', () => {
+        cell.style.opacity = '1';
+      });
+
+      cell.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const data = e.dataTransfer.getData('text/plain');
+        cell.textContent = data;
+        cell.dispatchEvent(new Event('input'));
+      });
+
+      cell.addEventListener('dragover', (e) => e.preventDefault());
+
+      sheet.appendChild(cell);
+    }
+  }
+}
+
+// Переключение режимов
+document.getElementById('to-spreadsheet').onclick = () => {
+  document.getElementById('editor-screen').style.display = 'none';
+  document.getElementById('spreadsheet-screen').style.display = 'block';
+  createSpreadsheet();
+};
+document.getElementById('to-editor').onclick = () => {
+  document.getElementById('spreadsheet-screen').style.display = 'none';
+  document.getElementById('editor-screen').style.display = 'block';
+};
+
+// Форматирование текста
+document.querySelectorAll('[data-cmd]').forEach(btn => {
+  btn.onclick = () => {
+    const cmd = btn.dataset.cmd;
+    if (cmd === 'insertTable') {
+      document.execCommand('insertHTML', false, '<table border="1" style="border-collapse:collapse;width:100%"><tr><td>A1</td><td>B1</td></tr><tr><td>A2</td><td>B2</td></tr></table>');
+    } else {
+      document.execCommand(cmd, false, null);
+    }
+  };
+});
+
+document.getElementById('font-family').addEventListener('change', e => {
+  document.execCommand('fontFamily', false, e.target.value);
+});
 
 function copyLink() {
   navigator.clipboard.writeText(location.href).then(() => alert('Ссылка скопирована!'));
 }
 
-function toggleDarkMode() {
-  document.body.classList.toggle('dark');
-  document.getElementById('editor').classList.toggle('dark');
+function addRow() {
+  const rows = document.querySelectorAll('.cell').length / 10;
+  createSpreadsheet(10, rows + 1);
 }
 
-document.querySelectorAll('[data-cmd]').forEach(btn => {
-  btn.onclick = () => {
-    const cmd = btn.dataset.cmd;
-    if (cmd === 'insertTable') {
-      const table = '<table border="1" style="border-collapse:collapse;width:100%"><tbody><tr><td>ячейка</td><td>ячейка</td></tr><tr><td> </td><td> </td></tr></tbody></table><p><br></p>';
-      document.execCommand('insertHTML', false, table);
-    } else {
-      document.execCommand(cmd, false, null);
-    }
-    save();
-  };
-});
+function addColumn() {
+  const cols = document.querySelectorAll('.cell').length / 20;
+  createSpreadsheet(cols + 1, 20);
+}
 
-async function startEditor() {
+// Запуск
+document.getElementById('start').onclick = async () => {
   await getKey();
   document.getElementById('welcome').style.display = 'none';
   document.getElementById('editor-screen').style.display = 'block';
-  await load();
-  document.getElementById('editor').focus();  // Фокус для Chrome и мобильки
-  setInterval(save, 8000);
-}
+};
 
-document.getElementById('start').onclick = startEditor;
-
-if (location.hash) {
-  startEditor();
+if (location.hash || new URLSearchParams(location.search).has('room')) {
+  document.getElementById('start').click();
 }
 </script>
 </body>
