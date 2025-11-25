@@ -1,285 +1,215 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Aura Office</title>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode.js@1.0.0/lib/qrcode.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family: system-ui, sans-serif; background: #fff7ed; height: 100vh; overflow: hidden; display: grid; place-items: center; position: relative; }
-    .logo { position: absolute; top: 20px; left: 24px; width: 40px; height: 40px; background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="white"/><path d="M256 100 L300 220 L420 240 L320 280 L300 400 L212 400 L192 280 L92 240 L212 220 Z" fill="%23fb923c"/><path d="M256 140 L290 200 L380 215 L310 245 L295 335 L217 335 L202 245 L122 215 L212 200 Z" fill="%23fed7aa"/><text x="256" y="480" text-anchor="middle" font-family="system-ui" font-size="50" fill="%230f172a">Aura</text></svg>') center/contain no-repeat; background-size: 38px; padding: 12px; border-radius: 16px; box-shadow: 0 6px 20px rgba(251,146,60,0.3); opacity: 0.5; animation: p 4s ease-in-out infinite; }
-    @keyframes p { 0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.05)}}
-    #welcome { text-align: center; }
-    #welcome h1 { font-size: 5rem; color: #ea580c; }
-    #welcome button { padding: 1.4rem 4rem; font-size: 1.7rem; background: #ea580c; color: white; border: none; border-radius: 999px; cursor: pointer; margin-top: 1.5rem; }
-    #editor-screen { display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: white; }
-    #editor { width: 100%; height: calc(100% - 60px); padding: 2rem; outline: none; user-select: text; caret-color: #ea580c; line-height: 1.6; }
-    
-    /* === ТУЛБАР — РОВНО ПО ВСЕЙ ШИРИНЕ === */
+    * { margin:0; padding:0; box-sizing:border-box; font-family: system-ui, sans-serif; }
+    body {
+      background: #fff7ed;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+    .logo {
+      position: absolute; top: 20px; left: 24px; width: 40px; height: 40px;
+      background: url('image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="white"/><path d="M256 100 L300 220 L420 240 L320 280 L300 400 L212 400 L192 280 L92 240 L212 220 Z" fill="%23fb923c"/><path d="M256 140 L290 200 L380 215 L310 245 L295 335 L217 335 L202 245 L122 215 L212 200 Z" fill="%23fed7aa"/><text x="256" y="480" text-anchor="middle" font-family="system-ui" font-size="50" fill="%230f172a">Aura</text></svg>') center/contain no-repeat;
+      background-size: 38px; padding: 12px; border-radius: 16px; box-shadow: 0 6px 20px rgba(251,146,60,0.3); z-index: 999; opacity: 0.5;
+    }
+    #welcome, #editor-screen, #excel-screen { display: none; }
+    #editor-screen.active, #excel-screen.active, #welcome.active { display: block; }
+
+    /* Документ-режим */
+    #editor-screen {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100vh; background: white;
+    }
     .topbar {
-      height: 60px;
-      background: white;
-      border-bottom: 1px solid #eee;
-      padding: 0 1.5rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 99;
-      overflow-x: auto;
-      white-space: nowrap;
+      position: fixed; top: 0; left: 0; right: 0; height: 70px; background: white;
+      display: flex; flex-wrap: wrap; gap: 8px; padding: 0 15px; align-items: center;
+      border-bottom: 1px solid #eee; z-index: 99;
     }
-    .toolbar-group {
-      display: flex;
-      gap: 8px;
-    }
-    .topbar button {
-      min-width: 44px;
-      height: 40px;
-      padding: 0 12px;
-      background: #fb923c;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .btn {
+      padding: 8px 16px; border: none; border-radius: 12px; background: #fb923c; color: white;
+      font-weight: 600; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
       transition: all 0.2s;
     }
-    .topbar button:hover { background: #ea580c; transform: translateY(-1px); }
-    
-    .status { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); padding: 8px; text-align: center; color: #555; font-size: 13px; }
-    .dark { background: #0f172a; color: #e2e8f0; }
-    .dark #editor { background: #1e293b; color: #e2e8f0; }
-    .dark .topbar { background: #1e293b; border-color: #334155; }
-    .dark .status { background: rgba(30,41,59,0.95); color: #94a3b8; }
-    .dark .topbar button { background: #fb923c; }
-    .dark .topbar button:hover { background: #fd9749; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
+    #editor { width: 100%; height: calc(100vh - 130px); padding: 80px 100px 50px; outline: none; background: #fff7ed; }
 
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 999; justify-content: center; align-items: center; }
-    .modal-content { background: white; padding: 2rem; border-radius: 16px; text-align: center; max-width: 90%; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-    .dark .modal-content { background: #1e293b; color: #e2e8f0; }
-    #qr-canvas { margin: 1rem 0; }
+    /* Excel-режим */
+    #excel-screen {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100vh;
+      background: white;
+    }
+    .excel-toolbar {
+      display: flex; align-items: center; padding: 0 10px; height: 40px;
+      background: #f1f3f4; border-bottom: 1px solid #dadce0;
+    }
+    .cell-address { 
+      width: 80px; padding: 0 8px; background: white; border: 1px solid #dadce0; 
+      text-align: center; font-family: monospace;
+    }
+    .formula-bar {
+      flex: 1; padding: 0 8px; background: white; border: 1px solid #dadce0;
+      outline: none; font-family: monospace; font-size: 14px;
+    }
+    .header-row {
+      display: flex; position: sticky; top: 70px; left: 0; background: #f1f3f4;
+    }
+    .col-header {
+      width: 80px; height: 24px; display: flex; align-items: center; justify-content: center;
+      border-right: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0;
+      font-size: 12px; font-weight: bold;
+    }
+    .row-number {
+      position: sticky; left: 0; width: 40px; height: 24px;
+      display: flex; align-items: center; justify-content: center;
+      background: #f1f3f4; border-right: 1px solid #e0e0e0;
+      font-size: 12px; z-index: 5;
+    }
+    .excel-grid {
+      display: grid; grid-template-columns: repeat(26, 80px); gap: 0;
+    }
+    .cell {
+      width: 80px; height: 24px; border-right: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0;
+      padding: 2px 4px; outline: none; font-size: 13px; background: white;
+    }
+    .cell:focus {
+      background: #e8f0fe; border: 1px solid #1a73e8;
+    }
+    .status { position: fixed; bottom: 0; left: 0; right: 0; padding: 10px; text-align: center; color: #555; }
   </style>
 </head>
 <body>
-  <div class="logo" title="Aura"></div>
 
-  <div id="welcome">
-    <h1>Aura</h1>
-    <p>Приватный офис с end-to-end шифрованием</p>
-    <button id="start">Создать документ →</button>
-  </div>
+<div class="logo" title="Aura"></div>
 
-  <div id="editor-screen">
-    <div class="topbar">
-      <!-- Форматирование текста -->
-      <div class="toolbar-group">
-        <button data-cmd="bold" title="Жирный">Ж</button>
-        <button data-cmd="italic" title="Курсив">К</button>
-        <button data-cmd="underline" title="Подчёркивание">П</button>
-        <button data-cmd="strikeThrough" title="Зачёркивание">Зач</button>
-      </div>
-
-      <!-- Выравнивание и списки -->
-      <div class="toolbar-group">
-        <button data-cmd="insertUnorderedList" title="Маркированный список">•</button>
-        <button data-cmd="insertOrderedList" title="Нумерованный список">1.</button>
-        <button data-cmd="justifyLeft" title="По левому краю">Л</button>
-        <button data-cmd="justifyCenter" title="По центру">Ц</button>
-        <button data-cmd="justifyRight" title="По правому краю">П</button>
-      </div>
-
-      <!-- Таблица -->
-      <div class="toolbar-group">
-        <button data-cmd="insertTable" title="Вставить таблицу">Таблица</button>
-      </div>
-
-      <!-- Экспорт / Импорт -->
-      <div class="toolbar-group">
-        <button onclick="exportPDF()" title="Экспорт в PDF">PDF</button>
-        <button onclick="exportHTML()" title="Экспорт в HTML">HTML</button>
-        <button onclick="importHTML()" title="Импорт HTML">Импорт</button>
-        <button onclick="printDoc()" title="Печать">Печать</button>
-      </div>
-
-      <!-- Обмен -->
-      <div class="toolbar-group">
-        <button onclick="showQR()" title="QR-код с шифрованием">QR</button>
-        <button onclick="shareMenu()" title="Поделиться">Поделиться</button>
-        <button onclick="toggleDark()" title="Тема">Тема</button>
-      </div>
-    </div>
-
-    <div id="editor" contenteditable="true">Начните писать...</div>
-    <div class="status">Защищённая комната активна — шифрование AES-256-GCM</div>
-  </div>
-
-  <!-- QR Modal -->
-  <div id="qr-modal" class="modal">
-    <div class="modal-content">
-      <h3>Поделитесь документом</h3>
-      <div id="qr-canvas"></div>
-      <p><small>Отсканируйте QR или скопируйте ссылку</small></p>
-      <button onclick="closeModal()" style="margin-top:1rem;padding:0.5rem 1rem;background:#fb923c;color:white;border:none;border-radius:6px;cursor:pointer;">Закрыть</button>
+<div id="welcome" class="active">
+  <div style="height:100vh;display:grid;place-items:center;text-align:center">
+    <div>
+      <h1 style="font-size:5rem;color:#ea580c">Aura</h1>
+      <p style="font-size:1.5rem;margin:1.5rem 0">Приватный офис с end-to-end шифрованием</p>
+      <button id="start" style="padding:1.4rem 4rem;font-size:1.7rem;background:#ea580c;color:white;border:none;border-radius:999px;cursor:pointer">Создать документ →</button>
     </div>
   </div>
+</div>
 
-  <script>
-    let key;
-    const { jsPDF } = window.jspdf;
+<div id="editor-screen">
+  <div class="topbar">
+    <button data-cmd="bold">Ж</button>
+    <button data-cmd="italic">К</button>
+    <button data-cmd="underline">П</button>
+    <button data-cmd="strike">Зач</button>
+    <button data-cmd="bulletList">•</button>
+    <button data-cmd="orderedList">1.</button>
+    <button data-cmd="taskList">☑</button>
+    <button data-cmd="insertTable">Таблица</button>
+    <button id="export-pdf">📄 PDF</button>
+    <button id="export-html">📤 HTML</button>
+    <button id="import-html">📥 Импорт</button>
+    <button id="print-btn">🖨️ Печать</button>
+    <button id="cipher-btn">🔒 QR</button>
+    <button id="share-btn">✉️ Поделиться</button>
+    <button id="aur-excel">📊 AurExcel</button>
+    <button id="theme-btn">🌙 Тема</button>
+  </div>
+  <div id="editor" contenteditable="true">Начните писать...</div>
+  <div class="status">Защищённая комната активна — шифрование AES-256-GCM</div>
+</div>
 
-    // === Шифрование ===
-    async function getKey() {
-      let h = location.hash.slice(1);
-      if (!h) {
-        key = await crypto.subtle.generateKey({name:"AES-GCM",length:256},true,["encrypt","decrypt"]);
-        const raw = await crypto.subtle.exportKey("raw", key);
-        location.hash = btoa(String.fromCharCode(...new Uint8Array(raw)));
-      } else {
-        try {
-          const raw = Uint8Array.from(atob(h), c => c.charCodeAt(0));
-          key = await crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["encrypt","decrypt"]);
-        } catch(e) {
-          alert('Битый ключ — создаём новый');
-          location.hash = ''; location.reload();
-        }
-      }
-    }
+<div id="excel-screen">
+  <div class="topbar">
+    <button id="back-to-editor">📄 Документ</button>
+    <button>Σ Сумма</button>
+    <button>⌀ Среднее</button>
+    <button>Фильтр</button>
+  </div>
+  <div class="excel-toolbar">
+    <div class="cell-address">A1</div>
+    <input class="formula-bar" placeholder="Введите формулу или значение">
+  </div>
+  <div class="header-row" id="col-headers"></div>
+  <div class="excel-grid" id="excel-grid"></div>
+  <div class="status">Режим: AurExcel — полный Excel-клон</div>
+</div>
 
-    // === Сохранение / Загрузка ===
-    async function save() {
-      if (!key) return;
-      const text = document.getElementById('editor').innerHTML;
-      const iv = crypto.getRandomValues(new Uint8Array(12));
-      const encrypted = await crypto.subtle.encrypt({name:"AES-GCM", iv}, key, new TextEncoder().encode(text));
-      localStorage.setItem('aura_doc_' + location.hash, JSON.stringify({
-        iv: Array.from(iv), data: Array.from(new Uint8Array(encrypted))
-      }));
-    }
-    async function load() {
-      const saved = localStorage.getItem('aura_doc_' + location.hash);
-      if (saved) {
-        try {
-          const {iv, data} = JSON.parse(saved);
-          const decrypted = await crypto.subtle.decrypt({name:"AES-GCM", iv:new Uint8Array(iv)}, key, new Uint8Array(data));
-          document.getElementById('editor').innerHTML = new TextDecoder().decode(decrypted);
-        } catch(e) {}
-      }
-    }
+<script>
+let currentCell = null;
 
-    // === Тулбар ===
-    document.querySelectorAll('[data-cmd]').forEach(btn => {
-      btn.onclick = () => {
-        const cmd = btn.dataset.cmd;
-        if (cmd === 'insertTable') {
-          document.execCommand('insertHTML', false, '<table border="1" style="border-collapse:collapse;width:100%"><tbody><tr><td>1</td><td>2</td></tr><tr><td>3</td><td>4</td></tr></tbody></table><p><br></p>');
-        } else {
-          document.execCommand(cmd, false, null);
-        }
-        save();
-      };
-    });
+function createExcelGrid() {
+  const colHeaders = document.getElementById('col-headers');
+  const grid = document.getElementById('excel-grid');
+  colHeaders.innerHTML = '';
+  grid.innerHTML = '';
 
-    // === QR-код ===
-    function showQR() {
-      const modal = document.getElementById('qr-modal');
-      const canvas = document.getElementById('qr-canvas');
-      canvas.innerHTML = '';
-      new QRCode(canvas, {
-        text: location.href,
-        width: 220, height: 220,
-        colorDark: document.body.classList.contains('dark') ? "#e2e8f0" : "#0f172a",
-        colorLight: document.body.classList.contains('dark') ? "#1e293b" : "#ffffff"
+  // Заголовки столбцов A-Z
+  for (let i = 0; i < 26; i++) {
+    const letter = String.fromCharCode(65 + i);
+    const th = document.createElement('div');
+    th.className = 'col-header';
+    th.textContent = letter;
+    colHeaders.appendChild(th);
+  }
+
+  // Ячейки 100x26
+  for (let row = 1; row <= 100; row++) {
+    const rn = document.createElement('div');
+    rn.className = 'row-number';
+    rn.textContent = row;
+    grid.appendChild(rn);
+    for (let col = 0; col < 26; col++) {
+      const letter = String.fromCharCode(65 + col);
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.contentEditable = 'true';
+      cell.setAttribute('data-addr', `${letter}${row}`);
+      cell.addEventListener('focus', () => {
+        currentCell = cell;
+        document.querySelector('.cell-address').textContent = cell.getAttribute('data-addr');
+        document.querySelector('.formula-bar').value = cell.textContent;
       });
-      modal.style.display = 'flex';
+      cell.addEventListener('input', () => {
+        if (currentCell === cell) {
+          document.querySelector('.formula-bar').value = cell.textContent;
+        }
+      });
+      grid.appendChild(cell);
     }
-    function closeModal() {
-      document.getElementById('qr-modal').style.display = 'none';
+  }
+}
+
+// Переключение режимов
+document.getElementById('start').onclick = () => {
+  document.getElementById('welcome').classList.remove('active');
+  document.getElementById('editor-screen').classList.add('active');
+};
+
+document.getElementById('aur-excel').onclick = () => {
+  document.getElementById('editor-screen').classList.remove('active');
+  document.getElementById('excel-screen').classList.add('active');
+  createExcelGrid();
+};
+
+document.getElementById('back-to-editor').onclick = () => {
+  document.getElementById('excel-screen').classList.remove('active');
+  document.getElementById('editor-screen').classList.add('active');
+};
+
+// Простые команды
+document.querySelectorAll('[data-cmd]').forEach(btn => {
+  btn.onclick = () => {
+    const cmd = btn.dataset.cmd;
+    if (cmd === 'insertTable') {
+      document.execCommand('insertHTML', false, '<table border="1" style="border-collapse:collapse;width:100%"><tr><td>A1</td><td>B1</td></tr></table>');
+    } else {
+      document.execCommand(cmd, false, null);
     }
+  };
+});
 
-    // === Экспорт PDF ===
-    function exportPDF() {
-      const doc = new jsPDF();
-      const text = document.getElementById('editor').innerText;
-      const splitText = doc.splitTextToSize(text, 180);
-      doc.text(splitText, 15, 20);
-      doc.save('aura-document.pdf');
-    }
-
-    // === Экспорт HTML ===
-    function exportHTML() {
-      const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Aura Document</title></head><body>${document.getElementById('editor').innerHTML}</body></html>`;
-      const blob = new Blob([html], {type: 'text/html'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = 'aura-document.html'; a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    // === Импорт HTML ===
-    function importHTML() {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.html,.htm';
-      input.onchange = e => {
-        const file = e.target.files[0];
-        const reader = new FileReader();
-        reader.onload = ev => {
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(ev.target.result, 'text/html');
-          document.getElementById('editor').innerHTML = doc.body.innerHTML || doc.documentElement.outerHTML;
-          save();
-        };
-        reader.readAsText(file);
-      };
-      input.click();
-    }
-
-    // === Печать ===
-    function printDoc() { window.print(); }
-
-    // === Поделиться ===
-    function shareMenu() {
-      const url = encodeURIComponent(location.href);
-      const text = encodeURIComponent("Мой зашифрованный документ в Aura Office");
-      const links = [
-        {name: 'Почта', icon: 'Почта', url: `mailto:?subject=Aura Document&body=${text}%0A${url}`},
-        {name: 'Telegram', icon: 'Telegram', url: `https://t.me/share/url?url=${url}&text=${text}`},
-        {name: 'WhatsApp', icon: 'WhatsApp', url: `https://wa.me/?text=${text}%20${url}`},
-        {name: 'X', icon: 'X', url: `https://twitter.com/intent/tweet?text=${text}&url=${url}`},
-        {name: 'VK', icon: 'VK', url: `https://vk.com/share.php?url=${url}&title=${text}`}
-      ];
-      const message = links.map(l => `${l.icon} ${l.name}: ${l.url}`).join('\n\n');
-      alert("Поделиться:\n\n" + message);
-    }
-
-    // === Тема ===
-    function toggleDark() {
-      document.body.classList.toggle('dark');
-      document.getElementById('editor').classList.toggle('dark');
-    }
-
-    // === Запуск ===
-    async function startEditor() {
-      await getKey();
-      document.getElementById('welcome').style.display = 'none';
-      document.getElementById('editor-screen').style.display = 'block';
-      await load();
-      const editor = document.getElementById('editor');
-      editor.focus();
-      setTimeout(() => { editor.focus(); if (document.activeElement !== editor) editor.click(); }, 100);
-      setInterval(save, 5000);
-    }
-
-    document.getElementById('start').onclick = startEditor;
-    if (location.hash) startEditor();
-  </script>
+// Кнопки экспорта — заглушки
+document.getElementById('export-pdf').onclick = () => alert('PDF экспорт (будет реализован)');
+</script>
 </body>
 </html>
