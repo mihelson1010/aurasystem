@@ -17,7 +17,7 @@
     }
     .logo {
       position: absolute; top: 20px; left: 24px; width: 40px; height: 40px;
-      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="white"/><path d="M256 100 L300 220 L420 240 L320 280 L300 400 L212 400 L192 280 L92 240 L212 220 Z" fill="%23fb923c"/><path d="M256 140 L290 200 L380 215 L310 245 L295 335 L217 335 L202 245 L122 215 L212 200 Z" fill="%23fed7aa"/><text x="256" y="480" text-anchor="middle" font-family="system-ui" font-size="50" fill="%230f172a">Aura</text></svg>') center/contain no-repeat;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg " viewBox="0 0 512 512"><rect width="512" height="512" fill="white"/><path d="M256 100 L300 220 L420 240 L320 280 L300 400 L212 400 L192 280 L92 240 L212 220 Z" fill="%23fb923c"/><path d="M256 140 L290 200 L380 215 L310 245 L295 335 L217 335 L202 245 L122 215 L212 200 Z" fill="%23fed7aa"/><text x="256" y="480" text-anchor="middle" font-family="system-ui" font-size="50" fill="%230f172a">Aura</text></svg>') center/contain no-repeat;
       background-size: 38px; padding: 12px; border-radius: 16px; box-shadow: 0 6px 20px rgba(251,146,60,0.3); z-index: 999; opacity: 0.5; animation: pulse 4s ease-in-out infinite; cursor: pointer;
     }
     .logo:hover { animation: none; opacity: 1; transform: scale(1.2); box-shadow: 0 8px 30px rgba(251,146,60,0.5); }
@@ -41,6 +41,12 @@
       background: rgba(255,255,255,0.95); padding: 10px; text-align: center;
       color: #555; font-size: 13px;
     }
+    .dark { 
+      background: #0f172a; color: #e2e8f0; 
+    }
+    .dark #editor { background: #1e293b; color: #e2e8f0; }
+    .dark .topbar { background: #1e293b; border-color: #334155; }
+    .dark .status { background: rgba(30,41,59,0.95); color: #94a3b8; }
   </style>
 </head>
 <body>
@@ -63,7 +69,7 @@
     <button data-cmd="orderedList">1.</button>
     <button data-cmd="insertTable">Таблица</button>
     <button onclick="copyLink()">🔗 Ссылка</button>
-    <button onclick="document.body.classList.toggle('dark')">🌙 Тема</button>
+    <button onclick="toggleDarkMode()">🌙 Тема</button>
   </div>
   <div id="editor" contenteditable="true">Начните писать…</div>
   <div class="status">Защищённая комната активна — шифрование AES-256-GCM</div>
@@ -71,6 +77,7 @@
 
 <script>
 let key;
+
 async function getKey() {
   let h = location.hash.slice(1);
   if (!h) {
@@ -82,47 +89,61 @@ async function getKey() {
     key = await crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["encrypt","decrypt"]);
   }
 }
+
 async function save() {
   if (!key) return;
   const text = document.getElementById('editor').innerHTML;
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const encrypted = await crypto.subtle.encrypt({name:"AES-GCM", iv}, key, new TextEncoder().encode(text));
-  localStorage.setItem('aura_'+location.search+location.hash, JSON.stringify({
+  localStorage.setItem('aura_doc_' + location.hash, JSON.stringify({
     iv: Array.from(iv),
     data: Array.from(new Uint8Array(encrypted))
   }));
 }
+
 async function load() {
-  const saved = localStorage.getItem('aura_'+location.search+location.hash);
+  const saved = localStorage.getItem('aura_doc_' + location.hash);
   if (saved) {
     const {iv, data} = JSON.parse(saved);
     const decrypted = await crypto.subtle.decrypt({name:"AES-GCM", iv:new Uint8Array(iv)}, key, new Uint8Array(data));
     document.getElementById('editor').innerHTML = new TextDecoder().decode(decrypted);
   }
 }
+
 function copyLink() {
   navigator.clipboard.writeText(location.href).then(() => alert('Ссылка скопирована!'));
 }
+
+function toggleDarkMode() {
+  document.body.classList.toggle('dark');
+  document.getElementById('editor').classList.toggle('dark');
+}
+
 document.querySelectorAll('[data-cmd]').forEach(btn => {
   btn.onclick = () => {
     const cmd = btn.dataset.cmd;
     if (cmd === 'insertTable') {
-      document.execCommand('insertHTML', false, '<table border="1" style="border-collapse:collapse;width:100%"><tr><td>1</td><td>2</td></tr><tr><td>3</td><td>4</td></tr></table>');
+      const table = '<table border="1" style="border-collapse:collapse;width:100%"><tbody><tr><td>ячейка</td><td>ячейка</td></tr><tr><td> </td><td> </td></tr></tbody></table><p><br></p>';
+      document.execCommand('insertHTML', false, table);
     } else {
       document.execCommand(cmd, false, null);
     }
     save();
   };
 });
-document.getElementById('start').onclick = async () => {
+
+async function startEditor() {
   await getKey();
   document.getElementById('welcome').style.display = 'none';
   document.getElementById('editor-screen').style.display = 'block';
   await load();
-  setInterval(save, 10000);
-};
-if (location.hash || new URLSearchParams(location.search).has('room')) {
-  document.getElementById('start').click();
+  setInterval(save, 8000);
+}
+
+document.getElementById('start').onclick = startEditor;
+
+if (location.hash) {
+  startEditor();
 }
 </script>
 </body>
