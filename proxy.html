@@ -3,228 +3,88 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>AuraSystem Proxy</title>
+  <title>AURASYSTEM</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: linear-gradient(45deg, #ff6b6b, #feca57);
-      --secondary: linear-gradient(45deg, #1e90ff, #00d2ff);
-      --accent: linear-gradient(45deg, #9c27b0, #e91e63);
-      --bg: #0a0a0a;
-      --card: #1a1a1a;
       --glow: #00ff88;
-      --glow-accent: #00ccff;
+      --accent: #00ccff;
     }
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
-      background: var(--bg);
+      background: #0a0a0a;
       color: #fff;
       font-family: 'Inter', sans-serif;
       text-align: center;
-      padding: 60px 20px;
+      padding: 80px 20px;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      line-height: 1.6;
     }
-    .container { max-width: 600px; width: 100%; }
-
-    /* === AURASYSTEM — КАК НА ГЛАВНОЙ === */
     h1 {
       font-family: 'Orbitron', sans-serif;
-      font-size: 3.8rem;
-      font-weight: 700;
-      letter-spacing: 4px;
-      background: linear-gradient(45deg, var(--glow), var(--glow-accent), #00ffaa, var(--glow-accent));
+      font-size: 4rem;
+      background: linear-gradient(45deg, var(--glow), var(--accent));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 1rem;
-      text-shadow: 
-        0 0 10px rgba(0,255,136,0.6),
-        0 0 20px rgba(0,255,136,0.4),
-        0 0 40px rgba(0,255,136,0.3),
-        0 0 80px rgba(0,255,136,0.2);
-      animation: neonPulse 2s infinite alternate;
+      text-shadow: 0 0 20px rgba(0,255,136,0.4);
+      animation: neon 2s infinite alternate;
     }
-    @keyframes neonPulse {
-      from { text-shadow: 0 0 10px rgba(0,255,136,0.6), 0 0 20px rgba(0,255,136,0.4); }
-      to { text-shadow: 0 0 20px rgba(0,255,136,0.8), 0 0 40px rgba(0,255,136,0.6), 0 0 80px rgba(0,255,136,0.4); }
+    @keyframes neon {
+      from { text-shadow: 0 0 10px rgba(0,255,136,0.6); }
+      to { text-shadow: 0 0 30px rgba(0,255,136,0.8); }
     }
-
     p {
-      font-size: 1.1rem;
+      font-size: 1.3rem;
       color: #aaa;
-      margin-bottom: 2rem;
+      margin: 20px 0 40px;
+      max-width: 600px;
     }
-    .input-group {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 30px;
-    }
-    input {
-      flex: 1;
-      padding: 16px 20px;
-      font-size: 1.1rem;
-      border: none;
-      border-radius: 16px;
-      background: var(--card);
-      color: #fff;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-      outline: none;
-      transition: all 0.3s ease;
-    }
-    input:focus {
-      box-shadow: 0 0 0 3px rgba(0,255,136,0.3);
-    }
-    input::placeholder { color: #666; }
-
     .btn {
-      padding: 16px 28px;
-      font-size: 1rem;
+      padding: 16px 32px;
+      font-size: 1.1rem;
       font-weight: 600;
       border: none;
       border-radius: 16px;
       cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      margin: 10px;
       transition: all 0.3s ease;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      min-width: 160px;
-      position: relative;
-      overflow: hidden;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
     }
-    .btn::before {
-      content: '';
-      position: absolute;
-      top: 0; left: -100%;
-      width: 100%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      transition: 0.5s;
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(0,0元年,0.4);
     }
-    .btn:hover::before { left: 100%; }
-    .btn:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
-    
-    .btn-primary { background: var(--primary); color: white; }
-    .btn-secondary { background: var(--secondary); color: white; }
-    .btn-accent { background: var(--accent); color: white; }
+    .btn-orange { background: linear-gradient(45deg, #ff6b6b, #feca57); color: white; }
+    .btn-blue { background: linear-gradient(45deg, #1e90ff, #00d2ff); color: white; }
+    .btn-purple { background: linear-gradient(45deg, #9c27b0, #e91e63); color: white; }
 
-    .btn-primary:hover { box-shadow: 0 10px 30px rgba(255,107,107,0.4); }
-    .btn-secondary:hover { box-shadow: 0 10px 30px rgba(30,144,255,0.4); }
-    .btn-accent:hover { box-shadow: 0 10px 30px rgba(156,39,176,0.4); }
-
-    /* === МЕРЦАЮЩИЙ ФУТЕР И DEBUG === */
-    .footer, .debug {
-      margin-top: 50px;
+    .footer {
+      margin-top: 60px;
       font-size: 0.9rem;
       color: #00ff88;
-      text-shadow: 0 0 5px rgba(0,255,136,0.4);
       animation: flicker 1.5s infinite alternate;
     }
-    .debug { 
-      color: #ff6b6b; 
-      font-size: 0.8rem; 
-      opacity: 0.8;
-      margin-top: 20px;
-    }
-    .footer a {
-      color: #00ccff;
-      text-decoration: none;
-      font-weight: 600;
-    }
-    .footer a:hover {
-      text-decoration: underline;
-      color: #00ffaa;
-    }
-
     @keyframes flicker {
-      0%, 100% { opacity: 0.7; text-shadow: 0 0 5px rgba(0,255,136,0.3); }
-      50% { opacity: 1; text-shadow: 0 0 10px rgba(0,255,136,0.6), 0 0 20px rgba(0,255,136,0.4); }
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; }
     }
-
-    .loading {
-      color: #00ff88;
-      font-size: 1.5rem;
-      animation: pulse 1.5s infinite;
-      text-shadow: 0 0 10px rgba(0,255,136,0.5);
-    }
-    @keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="loading" id="loading">Initializing AuraSystem Proxy...</div>
+  <h1>AURASYSTEM</h1>
+  <p>Privacy-native tools.<br>No servers. No accounts. Full control.</p>
 
-    <h1 id="title" style="display:none;">AURASYSTEM</h1>
-    <p id="desc" style="display:none;">Privacy-native proxy. No servers. Full control. Works on any network.</p>
+  <a href="/aurasystem/index.html" class="btn btn-orange">Aura Office →</a>
+  <a href="/aurasystem/index.html" class="btn btn-blue">Aura Shop →</a>
+  <a href="/aurasystem/proxy.html" class="btn btn-purple">Aura Proxy →</a>
 
-    <div class="input-group" id="inputGroup" style="display:none;">
-      <input type="text" id="url" placeholder="x.com, dexscreener.com, youtube.com..." />
-    </div>
-
-    <div id="buttons" style="display:flex; gap:15px; flex-wrap:wrap; justify-content:center; display:none;">
-      <button class="btn btn-primary" onclick="openProxy()">OPEN VIA PROXY</button>
-      <button class="btn btn-secondary" onclick="openNewTab()">NEW TAB</button>
-      <button class="btn btn-accent" onclick="copyEncrypted()">COPY LINK</button>
-    </div>
-
-    <!-- МЕРЦАЮЩИЙ ФУТЕР -->
-    <div class="footer" id="footer" style="display:none;">
-      © 2025 AuraSystem | <a href="https://aurasystem.one" target="_blank">aurasystem.one</a>
-    </div>
-
-    <!-- МЕРЦАЮЩИЙ DEBUG -->
-    <div class="debug" id="debug">Debug: Page loaded. Check console (F12) if stuck.</div>
+  <div class="footer">
+    Produced by mihelson1010 © 2025
   </div>
-
-  <script>
-    // === АВТО-ОПРЕДЕЛЕНИЕ ДОМЕНА ===
-    const isGitHub = window.location.origin.includes('github.io');
-    const GITHUB_BASE = 'https://mihelson1010.github.io/aurasystem/proxy.html?url=';
-    const CUSTOM_BASE = '/proxy.html?url=';
-    const BASE = isGitHub ? GITHUB_BASE : CUSTOM_BASE;
-
-    // === ЗАГРУЗКА ИНТЕРФЕЙСА ===
-    document.addEventListener('DOMContentLoaded', () => {
-      setTimeout(() => {
-        document.getElementById('loading').style.display = 'none';
-        ['title', 'desc', 'inputGroup', 'buttons', 'footer'].forEach(id => {
-          document.getElementById(id).style.display = id === 'inputGroup' ? 'flex' : 'block';
-        });
-      }, 600);
-    });
-
-    // === ФУНКЦИИ ===
-    function openProxy() {
-      const url = document.getElementById('url').value.trim();
-      if (!url) return alert('Enter URL!');
-      const full = url.startsWith('http') ? url : 'https://' + url;
-      const encoded = btoa(full);
-      window.location.href = BASE + encoded;
-    }
-
-    function openNewTab() {
-      const url = document.getElementById('url').value.trim();
-      if (!url) return;
-      const full = url.startsWith('http') ? url : 'https://' + url;
-      const encoded = btoa(full);
-      window.open(BASE + encoded, '_blank');
-    }
-
-    function copyEncrypted() {
-      const url = document.getElementById('url').value.trim();
-      if (!url) return alert('Enter URL!');
-      const full = url.startsWith('http') ? url : 'https://' + url;
-      const link = BASE + btoa(full);
-      navigator.clipboard.writeText(link).then(() => {
-        alert('Link copied to clipboard!');
-      });
-    }
-
-    // === ПОДСКАЗКИ ===
-    document.getElementById('url').addEventListener('input', function() {
-      const val = this.value.toLowerCase();
-      if (val.includes('x.') || val.includes('twitter')) this.value = 'https://x.com';
-      if (val.includes('youtube')) this.value = '
+</body>
+</html>
