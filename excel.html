@@ -6,20 +6,13 @@
   <title>AURASYSTEM</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --glow: #00ff88;
-      --accent: #00ccff;
-      --primary: linear-gradient(45deg, #ff6b6b, #feca57);
-      --secondary: linear-gradient(45deg, #1e90ff, #00d2ff);
-      --accent-purple: linear-gradient(45deg, #9c27b0, #e91e63);
-    }
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
       background: #0a0a0a;
       color: #fff;
       font-family: 'Inter', sans-serif;
       text-align: center;
-      padding: 80px 20px;
+      padding: 100px 20px 60px;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -28,58 +21,62 @@
     }
     h1 {
       font-family: 'Orbitron', sans-serif;
-      font-size: 5.5rem;
+      font-size: 5.8rem;
+      font-weight: 700;
+      color: #ff6b6b;
       background: linear-gradient(45deg, #ff6b6b, #feca57);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 30px rgba(255,107,107,0.6);
-      margin-bottom: 20px;
+      text-shadow: 0 0 25px rgba(255,107,107,0.5);
+      margin-bottom: 30px;
+      letter-spacing: 2px;
     }
     p {
       font-size: 1.3rem;
-      color: #aaa;
-      margin: 20px 0 50px;
+      color: #cccccc;
+      margin: 0 0 50px 0;
+      line-height: 1.6;
       max-width: 600px;
     }
     .btn {
-      padding: 16px 36px;
-      font-size: 1.2rem;
-      font-weight: 600;
-      border: none;
-      border-radius: 16px;
-      cursor: pointer;
-      text-decoration: none;
       display: inline-block;
+      padding: 16px 32px;
       margin: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: white;
+      text-decoration: none;
+      border-radius: 30px;
+      min-width: 200px;
       transition: all 0.3s ease;
       box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-      min-width: 200px;
     }
     .btn:hover {
       transform: translateY(-3px);
-      box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
     }
-    .btn-orange { background: var(--primary); color: white; }
-    .btn-blue { background: var(--secondary); color: white; }
-    .btn-purple { background: var(--accent-purple); color: white; }
-
+    .btn-orange {
+      background: linear-gradient(45deg, #ff6b6b, #feca57);
+    }
+    .btn-blue {
+      background: linear-gradient(45deg, #1e90ff, #00d2ff);
+    }
+    .btn-purple {
+      background: linear-gradient(45deg, #9c27b0, #e91e63);
+    }
     .footer {
       position: fixed;
       bottom: 20px;
       right: 20px;
-      font-size: 0.9rem;
-      color: var(--glow);
-      font-weight: 600;
-      animation: flicker 1.5s infinite alternate;
-      z-index: 100;
-    }
-    @keyframes flicker {
-      0%, 100% { opacity: 0.7; text-shadow: 0 0 5px rgba(0,255,136,0.3); }
-      50% { opacity: 1; text-shadow: 0 0 15px rgba(0,255,136,0.8); }
+      font-size: 0.85rem;
+      color: #00ff88;
+      font-weight: 500;
+      text-shadow: 0 0 8px rgba(0,255,136,0.4);
     }
   </style>
 </head>
 <body>
+
   <h1>AURASYSTEM</h1>
   <p>Privacy-native tools.<br>No servers. No accounts. Full control.</p>
 
@@ -87,8 +84,7 @@
   <a href="#" class="btn btn-blue">Aura Shop</a>
   <a href="https://mihelson1010.github.io/aurasystem/proxy.html" class="btn btn-purple">Aura Proxy</a>
 
-  <div class="footer">
-    Produced by mihelson1010 © 2025
-  </div>
+  <div class="footer">Produced by Mihelson™ © 2025</div>
+
 </body>
 </html>
