@@ -2,323 +2,74 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Aura Editor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Aura Office — AURASYSTEM</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; font-family: "Segoe UI", system-ui, sans-serif; }
+    :root {
+      --bg: #0a0a0a;
+      --card: #1a1a1a;
+      --primary: linear-gradient(45deg, #ff6b6b, #feca57);
+      --secondary: linear-gradient(45deg, #1e90ff, #00d2ff);
+      --accent: linear-gradient(45deg, #9c27b0, #e91e63);
+      --glow: #00ff88;
+      --glow-accent: #00ccff;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
     body {
-      background: #f9fafb;
-      height: 100vh;
-      overflow: hidden;
+      background: var(--bg); color: #fff; font-family: 'Inter', sans-serif;
+      height: 100vh; overflow: hidden; display: flex; flex-direction: column;
+    }
+    .topbar {
+      display: flex; gap: 10px; padding: 12px 20px;
+      background: linear-gradient(135deg, #111, #000); border-bottom: 2px solid var(--glow);
+      flex-wrap: wrap; box-shadow: 0 4px 20px rgba(0,255,136,0.2);
+    }
+    .tool-btn {
+      padding: 10px 18px; border: none; border-radius: 12px;
+      font-weight: 600; font-size: 14px; cursor: pointer;
+      background: #222; color: #aaa; transition: all 0.3s;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .tool-btn.active, .tool-btn:hover {
+      background: var(--glow); color: #000; transform: translateY(-2px);
+    }
+    .workspace {
+      flex: 1; background: white; margin: 20px; border-radius: 16px;
+      overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
       position: relative;
     }
-
-    .logo {
-      position: absolute; top: 20px; left: 24px; width: 40px; height: 40px;
-      background: url('image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="white"/><path d="M256 100 L300 220 L420 240 L320 280 L300 400 L212 400 L192 280 L92 240 L212 220 Z" fill="%23fb923c"/><path d="M256 140 L290 200 L380 215 L310 245 L295 335 L217 335 L202 245 L122 215 L212 200 Z" fill="%23fed7aa"/><text x="256" y="480" text-anchor="middle" font-family="system-ui" font-size="50" fill="%230f172a">Aura</text></svg>') center/contain no-repeat;
-      background-size: 38px; padding: 12px; border-radius: 16px; box-shadow: 0 6px 20px rgba(251,146,60,0.3); z-index: 999; opacity: 0.5;
+    iframe { width: 100%; height: 100%; border: none; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .footer {
+      padding: 8px 20px; font-size: 0.8rem; color: #555; text-align: center;
     }
-    .logo:hover { opacity: 1; transform: scale(1.2); box-shadow: 0 8px 30px rgba(251,146,60,0.5); }
-
-    #welcome { height: 100%; display: grid; place-items: center; text-align: center; }
-    #welcome h1 { font-size: 5rem; color: #ea580c; margin-bottom: 0.5rem; }
-    #welcome p { font-size: 1.5rem; color: #555; margin: 1.5rem 0; }
-    #welcome button { padding: 1.4rem 4rem; font-size: 1.7rem; background: #ea580c; color: white; border: none; border-radius: 999px; cursor: pointer; box-shadow: 0 16px 40px rgba(234,88,12,0.5); transition: 0.3s; }
-    #welcome button:hover { background: #c2410c; transform: translateY(-5px); }
-    small { display: block; margin-top: 2rem; color: #666; font-size: 1.1rem; }
-    #editor-screen { display: none; height: 100vh; background: white; position: absolute; top: 0; left: 0; width: 100%; }
-    #editor { width: 100%; height: calc(100vh - 130px); padding: 80px 100px 50px; font-size: 18px; line-height: 1.6; outline: none; background: #fff7ed; }
-    .topbar {
-      position: fixed; top: 0; left: 0; right: 0; height: 70px; background: white; border-bottom: 1px solid #eee;
-      display: flex; gap: 8px; padding: 0 15px; align-items: center; z-index: 99;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-    }
-    .toolbar-group {
-      display: flex; gap: 8px; padding: 8px; background: #f1f3f4; border-radius: 4px;
-    }
-    .btn {
-      padding: 6px 12px; border: none; border-radius: 4px; color: #333;
-      font-weight: 600; font-size: 14px; cursor: pointer;
-      background: #ffffff;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      transition: all 0.2s;
-    }
-    .btn:hover {
-      background: #e0e0e0;
-      box-shadow: 0 3px 6px rgba(0,0,0,0.15);
-    }
-    .btn:active {
-      transform: translateY(1px);
-    }
-    .btn.active {
-      background: #d0d0d0;
-      box-shadow: 0 3px 6px rgba(0,0,0,0.15);
-    }
-    .btn-icon {
-      width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
-      font-size: 16px;
-    }
-    .status { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); padding: 10px; text-align: center; color: #555; font-size: 13px; }
-    #qr-modal, #share-modal { display: none; }
-    .dark { background: #0f172a; color: #e2e8f0; }
-    .dark #editor { background: #1e293b; color: #e2e8f0; }
-    .dark .topbar { background: #1e293b; border-color: #334155; }
-    .dark .topbar button, .dark .topbar select { background: #3b82f6; color: white; }
   </style>
 </head>
 <body>
-
-<div class="logo" title="Aura"></div>
-
-<div id="welcome">
-  <h1>Aura</h1>
-  <p>Приватный редактор с end-to-end шифрованием</p>
-  <button id="start">Создать документ →</button>
-  <small>Поделись ссылкой — работайте вместе. Офлайн. Навсегда ваш.</small>
-</div>
-
-<div id="editor-screen">
   <div class="topbar">
-    <div class="toolbar-group">
-      <button data-cmd="bold" class="btn"><span class="btn-icon">B</span></button>
-      <button data-cmd="italic" class="btn"><span class="btn-icon">I</span></button>
-      <button data-cmd="underline" class="btn"><span class="btn-icon">U</span></button>
-      <button data-cmd="strike" class="btn"><span class="btn-icon">S</span></button>
+    <button class="tool-btn active" data-tab="editor">Редактор</button>
+    <button class="tool-btn" data-tab="excel">Таблица</button>
+  </div>
+  <div class="workspace">
+    <div id="editor" class="tab-content active">
+      <iframe src="https://mihelson1010.github.io/aurasystem/editor.html"></iframe>
     </div>
-    <div class="toolbar-group">
-      <select id="font-family">
-        <option value="Calibri, sans-serif">Calibri</option>
-        <option value="Arial, sans-serif">Arial</option>
-        <option value="Times New Roman, serif">Times New Roman</option>
-        <option value="Georgia, serif">Georgia</option>
-        <option value="Courier New, monospace">Courier New</option>
-      </select>
-      <select id="font-size">
-        <option value="11">11</option>
-        <option value="12">12</option>
-        <option value="14">14</option>
-        <option value="16">16</option>
-        <option value="18">18</option>
-        <option value="20">20</option>
-        <option value="22">22</option>
-        <option value="24">24</option>
-      </select>
-    </div>
-    <div class="toolbar-group">
-      <button data-cmd="justifyLeft" class="btn"><span class="btn-icon">←</span></button>
-      <button data-cmd="justifyCenter" class="btn"><span class="btn-icon">↔</span></button>
-      <button data-cmd="justifyRight" class="btn"><span class="btn-icon">→</span></button>
-      <button data-cmd="justifyFull" class="btn"><span class="btn-icon">≡</span></button>
-    </div>
-    <div class="toolbar-group">
-      <button data-cmd="insertOrderedList" class="btn"><span class="btn-icon">1.</span></button>
-      <button data-cmd="insertUnorderedList" class="btn"><span class="btn-icon">•</span></button>
-      <button data-cmd="insertTable" class="btn"><span class="btn-icon">□</span></button>
-    </div>
-    <div class="toolbar-group">
-      <button id="export-pdf" class="btn">📄 PDF</button>
-      <button id="export-html" class="btn">📤 HTML</button>
-      <button id="import-html" class="btn">📥 Импорт</button>
-      <button id="print-btn" class="btn">🖨️ Печать</button>
-      <button id="cipher-btn" class="btn">🔒 QR</button>
-      <button id="share-btn" class="btn">✉️ Поделиться</button>
-      <button id="theme-btn" class="btn">🌙 Тема</button>
+    <div id="excel" class="tab-content">
+      <iframe src="https://mihelson1010.github.io/aurasystem/excel.html"></iframe>
     </div>
   </div>
-  <div id="editor" contenteditable="true">Начните писать…</div>
-  <div class="status">Защищённая комната активна — шифрование AES-256-GCM</div>
-</div>
-
-<script>
-let key;
-async function getKey() {
-  const hash = location.hash.slice(1);
-  if (!hash) {
-    key = await crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
-    const raw = await crypto.subtle.exportKey("raw", key);
-    location.hash = btoa(String.fromCharCode(...new Uint8Array(raw)));
-  } else {
-    const raw = Uint8Array.from(atob(hash), c => c.charCodeAt(0));
-    key = await crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["encrypt", "decrypt"]);
-  }
-}
-async function save() {
-  if (!key) return;
-  const text = document.getElementById('editor').innerHTML;
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(text));
-  localStorage.setItem('aura_' + location.search + location.hash, JSON.stringify({ iv: [...iv],  [...new Uint8Array(encrypted)] }));
-}
-async function load() {
-  const saved = localStorage.getItem('aura_' + location.search + location.hash);
-  if (saved) {
-    const { iv, data } = JSON.parse(saved);
-    const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv: new Uint8Array(iv) }, key, new Uint8Array(data));
-    document.getElementById('editor').innerHTML = new TextDecoder().decode(decrypted);
-  }
-}
-
-// Форматирование
-document.querySelectorAll('[data-cmd]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const cmd = btn.dataset.cmd;
-    if (cmd === 'insertTable') {
-      const html = '<table border="1" style="border-collapse:collapse;width:100%;margin:10px 0"><tr><td>1</td><td>2</td></tr><tr><td>3</td><td>4</td></tr></table>';
-      document.execCommand('insertHTML', false, html);
-    } else {
-      document.execCommand(cmd, false, null);
-    }
-    save();
-  });
-});
-
-// Шрифты
-document.getElementById('font-family').addEventListener('change', e => {
-  document.execCommand('fontFamily', false, e.target.value); save();
-});
-document.getElementById('font-size').addEventListener('change', e => {
-  document.execCommand('fontSize', false, e.target.value); save();
-});
-
-// === ПЕЧАТЬ ===
-function printDocument() {
-  const editor = document.getElementById('editor');
-  const printContent = `
-    <html>
-    <head>
-      <title>Печать — Aura Office</title>
-      <style>
-        body { font-family: system-ui, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; background: white; color: black; }
-        @media print {
-          body { padding: 0; margin: 0; }
-          h1, h2, h3 { page-break-after: avoid; }
-          table { border-collapse: collapse; width: 100%; }
-          td, th { border: 1px solid #000; padding: 8px; }
-        }
-      </style>
-    </head>
-    <body>
-      ${editor.innerHTML}
-    </body>
-    </html>
-  `;
-  const win = window.open('', '_blank');
-  win.document.write(printContent);
-  win.document.close();
-  win.focus();
-  win.print();
-  win.close();
-}
-
-// === ЭКСПОРТ В PDF ===
-async function exportToPDF() {
-  const { jsPDF } = window.jspdf;
-  const editor = document.getElementById('editor');
-  const clone = editor.cloneNode(true);
-  clone.style.padding = '20px';
-  const canvas = await html2canvas(clone);
-  const imgData = canvas.toDataURL('image/png');
-  const pdf = new jsPDF('p', 'mm', 'a4');
-  const width = pdf.internal.pageSize.getWidth();
-  const height = (canvas.height * width) / canvas.width;
-  pdf.addImage(imgData, 'PNG', 0, 0, Math.min(width, 190), Math.min(height, 270));
-  pdf.save('aura-document.pdf');
-}
-
-// === ЭКСПОРТ В HTML ===
-function exportHTML() {
-  const content = document.getElementById('editor').innerHTML;
-  const blob = new Blob([`<html><head><meta charset="utf-8"></head><body>${content}</body></html>`], { type: 'text/html' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'document.html';
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-// === ИМПОРТ HTML ===
-function importHTML() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.html,.txt';
-  input.onchange = (e) => {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      document.getElementById('editor').innerHTML = ev.target.result;
-      save();
-    };
-    reader.readAsText(file);
-  };
-  input.click();
-}
-
-// === QR-шифрование ===
-function showQR() {
-  if (!key) return;
-  const qrModal = document.createElement('div');
-  qrModal.id = 'qr-modal';
-  qrModal.innerHTML = `
-    <div style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;display:grid;place-items:center;">
-      <div style="background:white;padding:24px;border-radius:20px;text-align:center;max-width:320px;width:90%;">
-        <div id="qr-code" style="margin:0 auto;"></div>
-        <p style="margin-top:16px;font-size:14px;color:#444;">Отсканируйте, чтобы открыть и расшифровать</p>
-        <button id="close-qr" style="margin-top:16px;padding:8px 20px;background:#ea580c;color:white;border:none;border-radius:12px;font-weight:bold;">Закрыть</button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(qrModal);
-  new QRCode(document.getElementById("qr-code"), { text: location.href, width: 220, height: 220 });
-  document.getElementById('close-qr').onclick = () => document.body.removeChild(qrModal);
-}
-
-// === ПОДЕЛИТЬСЯ ===
-function showShare() {
-  const shareModal = document.createElement('div');
-  shareModal.id = 'share-modal';
-  shareModal.innerHTML = `
-    <div style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;display:grid;place-items:center;">
-      <div style="background:white;padding:24px;border-radius:20px;text-align:center;max-width:320px;width:90%;">
-        <p style="margin-bottom:16px;">Отправить через:</p>
-        <div style="display:flex;gap:12px;justify-content:center;">
-          <button onclick="location.href='mailto:?subject=Aura%20Document&body=Открой%20зашифрованный%20документ:%20'+encodeURIComponent(location.href)" style="width:40px;height:40px;border-radius:50%;background:#4285F4;color:white;font-weight:bold;">📧</button>
-          <button onclick="window.open('https://t.me/share/url?url='+encodeURIComponent(location.href)+'&text=Документ%20Aura','_blank')" style="width:40px;height:40px;border-radius:50%;background:#0088cc;color:white;font-weight:bold;">✈️</button>
-          <button onclick="window.open('https://wa.me/?text='+encodeURIComponent('Aura%20документ:%20'+location.href),'_blank')" style="width:40px;height:40px;border-radius:50%;background:#25D366;color:white;font-weight:bold;">🟢</button>
-          <button onclick="window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent('Aura:%20приватный%20документ%20')+encodeURIComponent(location.href),'_blank')" style="width:40px;height:40px;border-radius:50%;background:#1DA1F2;color:white;font-weight:bold;">𝕏</button>
-          <button onclick="window.open('https://vk.com/share.php?url='+encodeURIComponent(location.href),'_blank')" style="width:40px;height:40px;border-radius:50%;background:#4C75A8;color:white;font-weight:bold;">VK</button>
-        </div>
-        <p style="margin:16px 0 8px;font-size:12px;color:#666;">Ссылка зашифрована. Безопасно.</p>
-        <button id="close-share" style="margin-top:8px;padding:8px 20px;background:#64748b;color:white;border:none;border-radius:12px;font-weight:bold;">Закрыть</button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(shareModal);
-  document.getElementById('close-share').onclick = () => document.body.removeChild(shareModal);
-}
-
-// === КНОПКИ ===
-document.getElementById('print-btn').onclick = printDocument;
-document.getElementById('export-pdf').onclick = exportToPDF;
-document.getElementById('export-html').onclick = exportHTML;
-document.getElementById('import-html').onclick = importHTML;
-document.getElementById('cipher-btn').onclick = showQR;
-document.getElementById('share-btn').onclick = showShare;
-document.getElementById('theme-btn').onclick = () => document.body.classList.toggle('dark');
-
-// === ЗАПУСК ===
-document.getElementById('start').onclick = async () => {
-  await getKey();
-  document.getElementById('welcome').style.display = 'none';
-  document.getElementById('editor-screen').style.display = 'block';
-  await load();
-  setInterval(save, 10000);
-  document.getElementById('editor').focus();
-};
-if (location.hash || new URLSearchParams(location.search).has('room')) {
-  document.getElementById('start').click();
-}
-</script>
+  <div class="footer">© 2025 AURASYSTEM</div>
+  <script>
+    document.querySelectorAll('.tool-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.getAttribute('data-tab')).classList.add('active');
+      });
+    });
+  </script>
 </body>
 </html>
-
