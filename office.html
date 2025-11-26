@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AurаExcel</title>
+  <title>Aura Editor</title>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; font-family: "Segoe UI", system-ui, sans-serif; }
     body {
@@ -13,214 +13,311 @@
       position: relative;
     }
 
-    .excel-topbar {
-      display: flex; gap: 12px; padding: 14px 20px; background: #207145; /* Зелёный цвет Excel */
-      align-items: center;
-      border-bottom: 1px solid #1a5a37;
-      flex-wrap: wrap;
+    .logo {
+      position: absolute; top: 20px; left: 24px; width: 40px; height: 40px;
+      background: url('image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="white"/><path d="M256 100 L300 220 L420 240 L320 280 L300 400 L212 400 L192 280 L92 240 L212 220 Z" fill="%23fb923c"/><path d="M256 140 L290 200 L380 215 L310 245 L295 335 L217 335 L202 245 L122 215 L212 200 Z" fill="%23fed7aa"/><text x="256" y="480" text-anchor="middle" font-family="system-ui" font-size="50" fill="%230f172a">Aura</text></svg>') center/contain no-repeat;
+      background-size: 38px; padding: 12px; border-radius: 16px; box-shadow: 0 6px 20px rgba(251,146,60,0.3); z-index: 999; opacity: 0.5;
     }
-    .excel-btn {
-      padding: 10px 22px; border: none; border-radius: 16px; color: white;
-      font-weight: 600; font-size: 16px; cursor: pointer;
-      background: linear-gradient(145deg, #2a8f5e, #207145);
-      box-shadow: 0 6px 14px rgba(0,0,0,0.2);
-      transition: all 0.25s;
-    }
-    .excel-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 18px rgba(0,0,0,0.25);
-      background: linear-gradient(145deg, #30a26d, #258352);
-    }
+    .logo:hover { opacity: 1; transform: scale(1.2); box-shadow: 0 8px 30px rgba(251,146,60,0.5); }
 
-    .excel-toolbar {
-      display: flex; align-items: center; padding: 0 20px 0 120px; height: 48px;
-      background: #f1f5f9; border-bottom: 1px solid #cbd5e1;
+    #welcome { height: 100%; display: grid; place-items: center; text-align: center; }
+    #welcome h1 { font-size: 5rem; color: #ea580c; margin-bottom: 0.5rem; }
+    #welcome p { font-size: 1.5rem; color: #555; margin: 1.5rem 0; }
+    #welcome button { padding: 1.4rem 4rem; font-size: 1.7rem; background: #ea580c; color: white; border: none; border-radius: 999px; cursor: pointer; box-shadow: 0 16px 40px rgba(234,88,12,0.5); transition: 0.3s; }
+    #welcome button:hover { background: #c2410c; transform: translateY(-5px); }
+    small { display: block; margin-top: 2rem; color: #666; font-size: 1.1rem; }
+    #editor-screen { display: none; height: 100vh; background: white; position: absolute; top: 0; left: 0; width: 100%; }
+    #editor { width: 100%; height: calc(100vh - 130px); padding: 80px 100px 50px; font-size: 18px; line-height: 1.6; outline: none; background: #fff7ed; }
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0; height: 70px; background: white; border-bottom: 1px solid #eee;
+      display: flex; gap: 8px; padding: 0 15px; align-items: center; z-index: 99;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     }
-    .cell-address { 
-      width: 100px; padding: 0 12px; background: white; border: 1px solid #cbd5e1; 
-      text-align: center; font-family: monospace; font-size: 15px;
+    .toolbar-group {
+      display: flex; gap: 8px; padding: 8px; background: #f1f3f4; border-radius: 4px;
     }
-    .formula-bar {
-      flex: 1; padding: 0 14px; background: white; border: 1px solid #cbd5e1;
-      outline: none; font-family: monospace; font-size: 16px;
+    .btn {
+      padding: 6px 12px; border: none; border-radius: 4px; color: #333;
+      font-weight: 600; font-size: 14px; cursor: pointer;
+      background: #ffffff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: all 0.2s;
     }
-    .header-row {
-      display: flex; position: sticky; top: 162px; left: 0; background: #f1f5f9;
-      z-index: 10; border-bottom: 1px solid #cbd5e1;
+    .btn:hover {
+      background: #e0e0e0;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.15);
     }
-    .col-header {
-      width: 90px; height: 28px; display: flex; align-items: center; justify-content: center;
-      font-size: 14px; font-weight: 600; color: #1e293b;
-      border-right: 1px solid #e2e8f0;
+    .btn:active {
+      transform: translateY(1px);
     }
-    .row-number {
-      position: sticky; left: 0; width: 80px; height: 28px;
-      display: flex; align-items: center; justify-content: flex-end;
-      padding-right: 10px;
-      background: #f1f5f9; border-right: 1px solid #e2e8f0;
-      font-size: 14px; color: #334155; z-index: 5;
+    .btn.active {
+      background: #d0d0d0;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.15);
     }
-    .excel-grid {
-      display: grid; grid-template-columns: repeat(26, 90px); gap: 0;
-      padding-left: 80px; background: white;
+    .btn-icon {
+      width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
     }
-    .cell {
-      width: 90px; height: 28px; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;
-      padding: 3px 6px; outline: none; font-size: 14px; background: white;
-      text-align: left;
-    }
-    .cell:focus {
-      background: #dbeafe;
-      border: 2px solid #3b82f6;
-      z-index: 1;
-      padding: 1px 4px;
-    }
+    .status { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); padding: 10px; text-align: center; color: #555; font-size: 13px; }
+    #qr-modal, #share-modal { display: none; }
+    .dark { background: #0f172a; color: #e2e8f0; }
+    .dark #editor { background: #1e293b; color: #e2e8f0; }
+    .dark .topbar { background: #1e293b; border-color: #334155; }
+    .dark .topbar button, .dark .topbar select { background: #3b82f6; color: white; }
   </style>
 </head>
 <body>
 
-<div class="excel-topbar">
-  <button class="excel-btn">Σ Сумма</button>
-  <button class="excel-btn">⌀ Среднее</button>
-  <button class="excel-btn">Фильтр</button>
-  <button class="excel-btn">График</button>
-  <button class="excel-btn">Формат</button>
-  <button id="back-to-editor" class="excel-btn">📄 Документ</button>
+<div class="logo" title="Aura"></div>
+
+<div id="welcome">
+  <h1>Aura</h1>
+  <p>Приватный редактор с end-to-end шифрованием</p>
+  <button id="start">Создать документ →</button>
+  <small>Поделись ссылкой — работайте вместе. Офлайн. Навсегда ваш.</small>
 </div>
 
-<div class="excel-toolbar">
-  <div class="cell-address">A1</div>
-  <input class="formula-bar" placeholder="Введите формулу или значение">
+<div id="editor-screen">
+  <div class="topbar">
+    <div class="toolbar-group">
+      <button data-cmd="bold" class="btn"><span class="btn-icon">B</span></button>
+      <button data-cmd="italic" class="btn"><span class="btn-icon">I</span></button>
+      <button data-cmd="underline" class="btn"><span class="btn-icon">U</span></button>
+      <button data-cmd="strike" class="btn"><span class="btn-icon">S</span></button>
+    </div>
+    <div class="toolbar-group">
+      <select id="font-family">
+        <option value="Calibri, sans-serif">Calibri</option>
+        <option value="Arial, sans-serif">Arial</option>
+        <option value="Times New Roman, serif">Times New Roman</option>
+        <option value="Georgia, serif">Georgia</option>
+        <option value="Courier New, monospace">Courier New</option>
+      </select>
+      <select id="font-size">
+        <option value="11">11</option>
+        <option value="12">12</option>
+        <option value="14">14</option>
+        <option value="16">16</option>
+        <option value="18">18</option>
+        <option value="20">20</option>
+        <option value="22">22</option>
+        <option value="24">24</option>
+      </select>
+    </div>
+    <div class="toolbar-group">
+      <button data-cmd="justifyLeft" class="btn"><span class="btn-icon">←</span></button>
+      <button data-cmd="justifyCenter" class="btn"><span class="btn-icon">↔</span></button>
+      <button data-cmd="justifyRight" class="btn"><span class="btn-icon">→</span></button>
+      <button data-cmd="justifyFull" class="btn"><span class="btn-icon">≡</span></button>
+    </div>
+    <div class="toolbar-group">
+      <button data-cmd="insertOrderedList" class="btn"><span class="btn-icon">1.</span></button>
+      <button data-cmd="insertUnorderedList" class="btn"><span class="btn-icon">•</span></button>
+      <button data-cmd="insertTable" class="btn"><span class="btn-icon">□</span></button>
+    </div>
+    <div class="toolbar-group">
+      <button id="export-pdf" class="btn">📄 PDF</button>
+      <button id="export-html" class="btn">📤 HTML</button>
+      <button id="import-html" class="btn">📥 Импорт</button>
+      <button id="print-btn" class="btn">🖨️ Печать</button>
+      <button id="cipher-btn" class="btn">🔒 QR</button>
+      <button id="share-btn" class="btn">✉️ Поделиться</button>
+      <button id="theme-btn" class="btn">🌙 Тема</button>
+    </div>
+  </div>
+  <div id="editor" contenteditable="true">Начните писать…</div>
+  <div class="status">Защищённая комната активна — шифрование AES-256-GCM</div>
 </div>
-
-<div class="header-row" id="col-headers"></div>
-<div class="excel-grid" id="excel-grid"></div>
 
 <script>
-let currentCell = null;
-
-function splitCell(addr) {
-  const colMatch = addr.match(/^[A-Z]+/);
-  const rowMatch = addr.match(/\d+$/);
-  if (!colMatch || !rowMatch) return [0, 0];
-  let col = 0;
-  for (let i = 0; i < colMatch[0].length; i++) {
-    col = col * 26 + (colMatch[0].charCodeAt(i) - 64);
+let key;
+async function getKey() {
+  const hash = location.hash.slice(1);
+  if (!hash) {
+    key = await crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
+    const raw = await crypto.subtle.exportKey("raw", key);
+    location.hash = btoa(String.fromCharCode(...new Uint8Array(raw)));
+  } else {
+    const raw = Uint8Array.from(atob(hash), c => c.charCodeAt(0));
+    key = await crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["encrypt", "decrypt"]);
   }
-  return [col - 1, parseInt(rowMatch[0]) - 1];
+}
+async function save() {
+  if (!key) return;
+  const text = document.getElementById('editor').innerHTML;
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(text));
+  localStorage.setItem('aura_' + location.search + location.hash, JSON.stringify({ iv: [...iv],  [...new Uint8Array(encrypted)] }));
+}
+async function load() {
+  const saved = localStorage.getItem('aura_' + location.search + location.hash);
+  if (saved) {
+    const { iv, data } = JSON.parse(saved);
+    const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv: new Uint8Array(iv) }, key, new Uint8Array(data));
+    document.getElementById('editor').innerHTML = new TextDecoder().decode(decrypted);
+  }
 }
 
-function getCellValue(addr) {
-  const cell = document.querySelector(`.cell[data-addr="${addr}"]`);
-  return cell ? cell.textContent.trim() : '0';
-}
+// Форматирование
+document.querySelectorAll('[data-cmd]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const cmd = btn.dataset.cmd;
+    if (cmd === 'insertTable') {
+      const html = '<table border="1" style="border-collapse:collapse;width:100%;margin:10px 0"><tr><td>1</td><td>2</td></tr><tr><td>3</td><td>4</td></tr></table>';
+      document.execCommand('insertHTML', false, html);
+    } else {
+      document.execCommand(cmd, false, null);
+    }
+    save();
+  });
+});
 
-function parseFormula(formula) {
-  if (!formula.startsWith('=')) return formula;
+// Шрифты
+document.getElementById('font-family').addEventListener('change', e => {
+  document.execCommand('fontFamily', false, e.target.value); save();
+});
+document.getElementById('font-size').addEventListener('change', e => {
+  document.execCommand('fontSize', false, e.target.value); save();
+});
 
-  try {
-    // =SUM(A1:A3)
-    if (formula.includes('SUM(')) {
-      const range = formula.match(/SUM\(([^)]+)\)/)[1];
-      const [start, end] = range.split(':');
-      const [startCol, startRow] = splitCell(start);
-      const [endCol, endRow] = splitCell(end);
-      let sum = 0;
-      for (let r = startRow; r <= endRow; r++) {
-        for (let c = startCol; c <= endCol; c++) {
-          const colLetter = String.fromCharCode(65 + c);
-          const val = parseFloat(getCellValue(colLetter + (r + 1))) || 0;
-          sum += val;
+// === ПЕЧАТЬ ===
+function printDocument() {
+  const editor = document.getElementById('editor');
+  const printContent = `
+    <html>
+    <head>
+      <title>Печать — Aura Office</title>
+      <style>
+        body { font-family: system-ui, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; background: white; color: black; }
+        @media print {
+          body { padding: 0; margin: 0; }
+          h1, h2, h3 { page-break-after: avoid; }
+          table { border-collapse: collapse; width: 100%; }
+          td, th { border: 1px solid #000; padding: 8px; }
         }
-      }
-      return sum;
-    }
-
-    // =AVERAGE(B1:B5)
-    if (formula.includes('AVERAGE(')) {
-      const range = formula.match(/AVERAGE\(([^)]+)\)/)[1];
-      const [start, end] = range.split(':');
-      const [startCol, startRow] = splitCell(start);
-      const [endCol, endRow] = splitCell(end);
-      let sum = 0, count = 0;
-      for (let r = startRow; r <= endRow; r++) {
-        for (let c = startCol; c <= endCol; c++) {
-          const colLetter = String.fromCharCode(65 + c);
-          const val = parseFloat(getCellValue(colLetter + (r + 1))) || 0;
-          sum += val;
-          count++;
-        }
-      }
-      return count > 0 ? (sum / count).toFixed(2) : '0';
-    }
-
-    // =A1+B1, =A1*2 и т.д.
-    const expr = formula.slice(1);
-    if (/^[A-Z]+\d+[\+\-\*\/][A-Z]+\d+$/.test(expr) || /^[A-Z]+\d+[\+\-\*\/]\d+$/.test(expr)) {
-      return new Function('return ' + expr
-        .replace(/[A-Z]+\d+/g, match => {
-          const val = parseFloat(getCellValue(match)) || 0;
-          return val;
-        })
-      )();
-    }
-
-    return formula;
-  } catch (e) {
-    return '#ERROR';
-  }
+      </style>
+    </head>
+    <body>
+      ${editor.innerHTML}
+    </body>
+    </html>
+  `;
+  const win = window.open('', '_blank');
+  win.document.write(printContent);
+  win.document.close();
+  win.focus();
+  win.print();
+  win.close();
 }
 
-function createExcelGrid() {
-  const colHeaders = document.getElementById('col-headers');
-  const grid = document.getElementById('excel-grid');
-  colHeaders.innerHTML = '';
-  grid.innerHTML = '';
-
-  // Заголовки столбцов A-Z
-  for (let i = 0; i < 26; i++) {
-    const letter = String.fromCharCode(65 + i);
-    const th = document.createElement('div');
-    th.className = 'col-header';
-    th.textContent = letter;
-    colHeaders.appendChild(th);
-  }
-
-  // Строки 1–100
-  for (let row = 1; row <= 100; row++) {
-    const rn = document.createElement('div');
-    rn.className = 'row-number';
-    rn.textContent = row;
-    grid.appendChild(rn);
-    for (let col = 0; col < 26; col++) {
-      const letter = String.fromCharCode(65 + col);
-      const addr = `${letter}${row}`;
-      const cell = document.createElement('div');
-      cell.className = 'cell';
-      cell.contentEditable = 'true';
-      cell.setAttribute('data-addr', addr);
-      cell.addEventListener('focus', () => {
-        currentCell = cell;
-        document.querySelector('.cell-address').textContent = addr;
-        document.querySelector('.formula-bar').value = cell.textContent;
-      });
-      cell.addEventListener('input', () => {
-        if (cell.textContent.startsWith('=')) {
-          const result = parseFormula(cell.textContent);
-          cell.textContent = result;
-          cell.setAttribute('title', result);
-        }
-      });
-      grid.appendChild(cell);
-    }
-  }
+// === ЭКСПОРТ В PDF ===
+async function exportToPDF() {
+  const { jsPDF } = window.jspdf;
+  const editor = document.getElementById('editor');
+  const clone = editor.cloneNode(true);
+  clone.style.padding = '20px';
+  const canvas = await html2canvas(clone);
+  const imgData = canvas.toDataURL('image/png');
+  const pdf = new jsPDF('p', 'mm', 'a4');
+  const width = pdf.internal.pageSize.getWidth();
+  const height = (canvas.height * width) / canvas.width;
+  pdf.addImage(imgData, 'PNG', 0, 0, Math.min(width, 190), Math.min(height, 270));
+  pdf.save('aura-document.pdf');
 }
 
-document.getElementById('back-to-editor').onclick = () => {
-  window.location.href = '/aurasystem/editor/';
+// === ЭКСПОРТ В HTML ===
+function exportHTML() {
+  const content = document.getElementById('editor').innerHTML;
+  const blob = new Blob([`<html><head><meta charset="utf-8"></head><body>${content}</body></html>`], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'document.html';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// === ИМПОРТ HTML ===
+function importHTML() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.html,.txt';
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      document.getElementById('editor').innerHTML = ev.target.result;
+      save();
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+// === QR-шифрование ===
+function showQR() {
+  if (!key) return;
+  const qrModal = document.createElement('div');
+  qrModal.id = 'qr-modal';
+  qrModal.innerHTML = `
+    <div style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;display:grid;place-items:center;">
+      <div style="background:white;padding:24px;border-radius:20px;text-align:center;max-width:320px;width:90%;">
+        <div id="qr-code" style="margin:0 auto;"></div>
+        <p style="margin-top:16px;font-size:14px;color:#444;">Отсканируйте, чтобы открыть и расшифровать</p>
+        <button id="close-qr" style="margin-top:16px;padding:8px 20px;background:#ea580c;color:white;border:none;border-radius:12px;font-weight:bold;">Закрыть</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(qrModal);
+  new QRCode(document.getElementById("qr-code"), { text: location.href, width: 220, height: 220 });
+  document.getElementById('close-qr').onclick = () => document.body.removeChild(qrModal);
+}
+
+// === ПОДЕЛИТЬСЯ ===
+function showShare() {
+  const shareModal = document.createElement('div');
+  shareModal.id = 'share-modal';
+  shareModal.innerHTML = `
+    <div style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;display:grid;place-items:center;">
+      <div style="background:white;padding:24px;border-radius:20px;text-align:center;max-width:320px;width:90%;">
+        <p style="margin-bottom:16px;">Отправить через:</p>
+        <div style="display:flex;gap:12px;justify-content:center;">
+          <button onclick="location.href='mailto:?subject=Aura%20Document&body=Открой%20зашифрованный%20документ:%20'+encodeURIComponent(location.href)" style="width:40px;height:40px;border-radius:50%;background:#4285F4;color:white;font-weight:bold;">📧</button>
+          <button onclick="window.open('https://t.me/share/url?url='+encodeURIComponent(location.href)+'&text=Документ%20Aura','_blank')" style="width:40px;height:40px;border-radius:50%;background:#0088cc;color:white;font-weight:bold;">✈️</button>
+          <button onclick="window.open('https://wa.me/?text='+encodeURIComponent('Aura%20документ:%20'+location.href),'_blank')" style="width:40px;height:40px;border-radius:50%;background:#25D366;color:white;font-weight:bold;">🟢</button>
+          <button onclick="window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent('Aura:%20приватный%20документ%20')+encodeURIComponent(location.href),'_blank')" style="width:40px;height:40px;border-radius:50%;background:#1DA1F2;color:white;font-weight:bold;">𝕏</button>
+          <button onclick="window.open('https://vk.com/share.php?url='+encodeURIComponent(location.href),'_blank')" style="width:40px;height:40px;border-radius:50%;background:#4C75A8;color:white;font-weight:bold;">VK</button>
+        </div>
+        <p style="margin:16px 0 8px;font-size:12px;color:#666;">Ссылка зашифрована. Безопасно.</p>
+        <button id="close-share" style="margin-top:8px;padding:8px 20px;background:#64748b;color:white;border:none;border-radius:12px;font-weight:bold;">Закрыть</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(shareModal);
+  document.getElementById('close-share').onclick = () => document.body.removeChild(shareModal);
+}
+
+// === КНОПКИ ===
+document.getElementById('print-btn').onclick = printDocument;
+document.getElementById('export-pdf').onclick = exportToPDF;
+document.getElementById('export-html').onclick = exportHTML;
+document.getElementById('import-html').onclick = importHTML;
+document.getElementById('cipher-btn').onclick = showQR;
+document.getElementById('share-btn').onclick = showShare;
+document.getElementById('theme-btn').onclick = () => document.body.classList.toggle('dark');
+
+// === ЗАПУСК ===
+document.getElementById('start').onclick = async () => {
+  await getKey();
+  document.getElementById('welcome').style.display = 'none';
+  document.getElementById('editor-screen').style.display = 'block';
+  await load();
+  setInterval(save, 10000);
+  document.getElementById('editor').focus();
 };
-
-createExcelGrid();
+if (location.hash || new URLSearchParams(location.search).has('room')) {
+  document.getElementById('start').click();
+}
 </script>
 </body>
 </html>
