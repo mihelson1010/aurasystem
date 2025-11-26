@@ -10,10 +10,12 @@
       --primary: linear-gradient(45deg, #ff6b6b, #feca57);
       --secondary: linear-gradient(45deg, #1e90ff, #00d2ff);
       --accent: linear-gradient(45deg, #9c27b0, #e91e63);
+      --bg: #0a0a0a;
+      --card: #1a1a1a;
     }
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
-      background: #0a0a0a;
+      background: var(--bg);
       color: #fff;
       font-family: 'Inter', sans-serif;
       text-align: center;
@@ -23,7 +25,9 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      line-height: 1.6;
     }
+    .container { max-width: 600px; width: 100%; }
     h1 {
       font-family: 'Orbitron', sans-serif;
       font-size: 3.5rem;
@@ -37,13 +41,10 @@
       font-size: 1.1rem;
       color: #aaa;
       margin-bottom: 2rem;
-      max-width: 600px;
     }
     .input-group {
       display: flex;
       gap: 10px;
-      max-width: 500px;
-      width: 100%;
       margin-bottom: 30px;
     }
     input {
@@ -52,10 +53,14 @@
       font-size: 1.1rem;
       border: none;
       border-radius: 16px;
-      background: #1a1a1a;
+      background: var(--card);
       color: #fff;
       box-shadow: 0 4px 15px rgba(0,0,0,0.3);
       outline: none;
+      transition: all 0.3s ease;
+    }
+    input:focus {
+      box-shadow: 0 0 0 3px rgba(0,255,136,0.3);
     }
     input::placeholder { color: #666; }
     .btn {
@@ -70,7 +75,18 @@
       text-transform: uppercase;
       letter-spacing: 1px;
       min-width: 160px;
+      position: relative;
+      overflow: hidden;
     }
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: 0.5s;
+    }
+    .btn:hover::before { left: 100%; }
     .btn:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
     
     .btn-primary { background: var(--primary); color: white; }
@@ -87,38 +103,66 @@
       color: #555;
     }
     .footer a { color: #00ff88; text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+
+    .loading {
+      color: #00ff88;
+      font-size: 1.5rem;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+
+    .debug { color: #ff6b6b; font-size: 0.8rem; margin-top: 20px; opacity: 0.7; }
   </style>
 </head>
 <body>
-  <h1>AURASYSTEM</h1>
-  <p>Privacy-native proxy. Works everywhere. Full control.</p>
+  <div class="container">
+    <div class="loading" id="loading">Initializing AuraSystem Proxy...</div>
 
-  <div class="input-group">
-    <input type="text" id="url" placeholder="x.com, dexscreener.com, youtube.com..." />
-  </div>
+    <h1 id="title" style="display:none;">AURASYSTEM</h1>
+    <p id="desc" style="display:none;">Privacy-native proxy. No servers. Full control. Works on any network.</p>
 
-  <div style="display:flex; gap:15px; flex-wrap:wrap; justify-content:center;">
-    <button class="btn btn-primary" onclick="openProxy()">OPEN VIA PROXY</button>
-    <button class="btn btn-secondary" onclick="openNewTab()">NEW TAB</button>
-    <button class="btn btn-accent" onclick="copyEncrypted()">COPY LINK</button>
-  </div>
+    <div class="input-group" id="inputGroup" style="display:none;">
+      <input type="text" id="url" placeholder="x.com, dexscreener.com, youtube.com..." />
+    </div>
 
-  <div class="footer">
-    © 2025 Mihelson10 | <a href="https://aurasystem.one">aurasystem.one</a>
+    <div id="buttons" style="display:flex; gap:15px; flex-wrap:wrap; justify-content:center; display:none;">
+      <button class="btn btn-primary" onclick="openProxy()">OPEN VIA PROXY</button>
+      <button class="btn btn-secondary" onclick="openNewTab()">NEW TAB</button>
+      <button class="btn btn-accent" onclick="copyEncrypted()">COPY LINK</button>
+    </div>
+
+    <div class="footer" id="footer" style="display:none;">
+      © 2025 AuraSystem | <a href="https://aurasystem.one" target="_blank">aurasystem.one</a>
+    </div>
+
+    <div class="debug" id="debug">Debug: Page loaded. Check console (F12) if stuck.</div>
   </div>
 
   <script>
-    // Авто-определение домена (GitHub или кастомный)
-    const BASE = window.location.origin.includes('github.io') 
-      ? 'https://mihelson10.github.io/aurasystem/proxy.html?url=' 
-      : '/proxy.html?url=';
+    // === АВТО-ОПРЕДЕЛЕНИЕ ДОМЕНА ===
+    const isGitHub = window.location.origin.includes('github.io');
+    const GITHUB_BASE = 'https://ВАШ_НИК.github.io/aurasystem/proxy.html?url=';
+    const CUSTOM_BASE = '/proxy.html?url=';
+    const BASE = isGitHub ? GITHUB_BASE : CUSTOM_BASE;
 
+    // === ЗАГРУЗКА ИНТЕРФЕЙСА ===
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        document.getElementById('loading').style.display = 'none';
+        ['title', 'desc', 'inputGroup', 'buttons', 'footer'].forEach(id => {
+          document.getElementById(id).style.display = id === 'inputGroup' ? 'flex' : 'block';
+        });
+      }, 600);
+    });
+
+    // === ФУНКЦИИ ===
     function openProxy() {
       const url = document.getElementById('url').value.trim();
       if (!url) return alert('Enter URL!');
       const full = url.startsWith('http') ? url : 'https://' + url;
       const encoded = btoa(full);
-      window.location.href = BASE + encoded;
+      window.location.href = BASE.replace('ВАШ_НИК', getGitHubUsername()) + encoded;
     }
 
     function openNewTab() {
@@ -126,25 +170,35 @@
       if (!url) return;
       const full = url.startsWith('http') ? url : 'https://' + url;
       const encoded = btoa(full);
-      window.open(BASE + encoded, '_blank');
+      window.open(BASE.replace('ВАШ_НИК', getGitHubUsername()) + encoded, '_blank');
     }
 
     function copyEncrypted() {
       const url = document.getElementById('url').value.trim();
       if (!url) return alert('Enter URL!');
       const full = url.startsWith('http') ? url : 'https://' + url;
-      const link = BASE + btoa(full);
-      navigator.clipboard.writeText(link);
-      alert('Link copied!');
+      const link = BASE.replace('ВАШ_НИК', getGitHubUsername()) + btoa(full);
+      navigator.clipboard.writeText(link).then(() => {
+        alert('Link copied to clipboard!');
+      });
     }
 
-    // Подсказки
+    // === ПОДСКАЗКИ ===
     document.getElementById('url').addEventListener('input', function() {
       const val = this.value.toLowerCase();
       if (val.includes('x.') || val.includes('twitter')) this.value = 'https://x.com';
       if (val.includes('youtube')) this.value = 'https://youtube.com';
       if (val.includes('dex')) this.value = 'https://dexscreener.com';
+      if (val.includes('poloniex')) this.value = 'https://poloniex.com';
     });
+
+    // === ПОЛУЧИТЬ НИК СТРАНИЦЫ (если на GitHub) ===
+    function getGitHubUsername() {
+      if (!isGitHub) return '';
+      const path = window.location.pathname;
+      const match = path.match(/\/([^\/]+)\.github\.io/);
+      return match ? match[1] : 'YOUR_USERNAME';
+    }
   </script>
 </body>
 </html>
