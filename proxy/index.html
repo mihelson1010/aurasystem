@@ -2,53 +2,87 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>ПРОКСИ АУРАСИСТЕМЫ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>АУРАСИСТЕМА ПРОКСИ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    body { background:#000; color:#0f0; font-family: 'Courier New'; text-align:center; padding:50px; }
-    input, button { padding:15px; font-size:1.2em; margin:10px; }
-    button { background:#000; color:#0f0; border:2px solid #0f0; cursor:pointer; }
-    button:hover { background:#0f0; color:#000; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      background: #0a0a0a;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      text-align: center;
+      padding: 60px 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 3.5rem;
+      background: linear-gradient(45deg, #00ff88, #00ccff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 20px rgba(0,255,136,0.3);
+    }
+    p {
+      font-size: 1.1rem;
+      color: #aaa;
+      margin-bottom: 2rem;
+      max-width: 600px;
+    }
+    .input-group {
+      display: flex;
+      gap: 10px;
+      max-width: 500px;
+      width: 100%;
+      margin-bottom: 30px;
+    }
+    input {
+      flex: 1;
+      padding: 16px 20px;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 16px;
+      background: #1a1a1a;
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      outline: none;
+    }
+    input::placeholder { color: #666; }
+    .btn {
+      padding: 16px 28px;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      min-width: 160px;
+    }
+    .btn:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+    
+    .btn-primary { background: linear-gradient(45deg, #ff6b6b, #feca57); color: white; }
+    .btn-secondary { background: linear-gradient(45deg, #1e90ff, #00d2ff); color: white; }
+    .btn-accent { background: linear-gradient(45deg, #9c27b0, #e91e63); color: white; }
+
+    .btn-primary:hover { box-shadow: 0 10px 30px rgba(255,107,107,0.4); }
+    .btn-secondary:hover { box-shadow: 0 10px 30px rgba(30,144,255,0.4); }
+    .btn-accent:hover { box-shadow: 0 10px 30px rgba(156,39,176,0.4); }
+
+    .footer {
+      margin-top: 50px;
+      font-size: 0.9rem;
+      color: #555;
+    }
+    .footer a { color: #00ff88; text-decoration: none; }
   </style>
 </head>
 <body>
-  <h1>АУРАСИСТЕМА ПРОКСИ</h1>
-  <input id="url" placeholder="Введи URL (например, x.com)" style="width:300px;" />
-  <br>
-  <button onclick="openProxy()">ОТКРЫТЬ ЧЕРЕЗ ПРОКСИ</button>
-  <button onclick="openNewTab()">НОВАЯ ВКЛАДКА</button>
-  <button onclick="copyEncrypted()">КОПИРОВАТЬ ШИФР</button>
-
-  <script>
-    const PROXY_URL = "https://твойник.github.io/aurasystem/proxy.html?url="; // ← твой GitHub Pages
-
-    function openProxy() {
-      const url = document.getElementById('url').value.trim();
-      if (!url) return alert('Введи URL!');
-      const encoded = btoa(url);
-      window.location.href = PROXY_URL + encoded;
-    }
-
-    function openNewTab() {
-      const url = document.getElementById('url').value.trim();
-      if (!url) return;
-      const encoded = btoa(url);
-      window.open(PROXY_URL + encoded, '_blank');
-    }
-
-    function copyEncrypted() {
-      const url = document.getElementById('url').value.trim();
-      if (!url) return alert('Введи URL!');
-      const encrypted = btoa(url);
-      const fullLink = PROXY_URL + encrypted;
-      navigator.clipboard.writeText(fullLink);
-      alert('Ссылка скопирована! Отправь оленю.');
-    }
-
-    // Авто-открытие X при загрузке
-    if (!window.location.search) {
-      document.getElementById('url').value = 'https://x.com';
-      setTimeout(openProxy, 500);
-    }
-  </script>
-</body>
-</html>
+  <
