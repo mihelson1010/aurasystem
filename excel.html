@@ -1,265 +1,94 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>AuraExcel — AURASYSTEM</title>
+  <title>AURASYSTEM</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0a0a0a;
-      --card: #1a1a1a;
+      --glow: #00ff88;
+      --accent: #00ccff;
       --primary: linear-gradient(45deg, #ff6b6b, #feca57);
       --secondary: linear-gradient(45deg, #1e90ff, #00d2ff);
-      --accent: linear-gradient(45deg, #9c27b0, #e91e63);
-      --glow: #00ff88;
-      --glow-accent: #00ccff;
+      --accent-purple: linear-gradient(45deg, #9c27b0, #e91e63);
     }
-    * { margin:0; padding:0; box-sizing:border-box; font-family: 'Inter', sans-serif; }
+    * { margin:0; padding:0; box-sizing:border-box; }
     body {
-      background: var(--bg);
+      background: #0a0a0a;
       color: #fff;
-      height: 100vh;
-      overflow: hidden;
-      position: relative;
-    }
-
-    /* === ТОПБАР — НЕОНОВЫЙ === */
-    .excel-topbar {
-      display: flex; gap: 12px; padding: 14px 20px;
-      background: linear-gradient(135deg, #1a1a1a, #0f0f0f);
+      font-family: 'Inter', sans-serif;
+      text-align: center;
+      padding: 80px 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
       align-items: center;
-      border-bottom: 2px solid #00ff88;
-      flex-wrap: wrap;
-      box-shadow: 0 4px 20px rgba(0,255,136,0.2);
     }
-    .excel-btn {
-      padding: 10px 22px; border: none; border-radius: 16px; color: white;
-      font-weight: 600; font-size: 15px; cursor: pointer;
-      background: var(--primary);
-      box-shadow: 0 6px 16px rgba(255,107,107,0.3);
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 5.5rem;
+      background: linear-gradient(45deg, #ff6b6b, #feca57);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 30px rgba(255,107,107,0.6);
+      margin-bottom: 20px;
+    }
+    p {
+      font-size: 1.3rem;
+      color: #aaa;
+      margin: 20px 0 50px;
+      max-width: 600px;
+    }
+    .btn {
+      padding: 16px 36px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 16px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      margin: 12px;
       transition: all 0.3s ease;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      position: relative;
-      overflow: hidden;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      min-width: 200px;
     }
-    .excel-btn::before {
-      content: ''; position: absolute; top: 0; left: -100%;
-      width: 100%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      transition: 0.5s;
-    }
-    .excel-btn:hover::before { left: 100%; }
-    .excel-btn:hover {
+    .btn:hover {
       transform: translateY(-3px);
-      box-shadow: 0 10px 25px rgba(255,107,107,0.4);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.4);
     }
-    .excel-btn:nth-child(2) { background: var(--secondary); }
-    .excel-btn:nth-child(3) { background: var(--accent); }
-    .excel-btn:nth-child(4) { background: var(--primary); }
-    .excel-btn:nth-child(5) { background: var(--secondary); }
-    #back-to-editor {
-      background: linear-gradient(45deg, #00ff88, #00ccff);
-      color: #000;
-      font-weight: 700;
-    }
+    .btn-orange { background: var(--primary); color: white; }
+    .btn-blue { background: var(--secondary); color: white; }
+    .btn-purple { background: var(--accent-purple); color: white; }
 
-    /* === ТУЛБАР === */
-    .excel-toolbar {
-      display: flex; align-items: center; padding: 0 20px 0 100px; height: 48px;
-      background: #111;
-      border-bottom: 1px solid #333;
+    .footer {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      font-size: 0.9rem;
+      color: var(--glow);
+      font-weight: 600;
+      animation: flicker 1.5s infinite alternate;
+      z-index: 100;
     }
-    .cell-address { 
-      width: 90px; padding: 0 12px; background: #222; border: 1px solid #444; 
-      text-align: center; font-family: 'Orbitron', monospace; font-size: 14px; color: #00ff88;
-    }
-    .formula-bar {
-      flex: 1; padding: 0 14px; background: #222; border: 1px solid #444;
-      outline: none; font-family: monospace; font-size: 15px; color: #fff;
-    }
-
-    /* === ЗАГОЛОВКИ === */
-    .header-row {
-      display: flex; position: sticky; top: 110px; left: 0; background: #111;
-      z-index: 10; border-bottom: 1px solid #333;
-    }
-    .col-header {
-      width: 90px; height: 32px; display: flex; align-items: center; justify-content: center;
-      font-size: 13px; font-weight: 600; color: #00ff88;
-      border-right: 1px solid #333; font-family: 'Orbitron', sans-serif;
-    }
-    .row-number {
-      position: sticky; left: 0; width: 70px; height: 32px;
-      display: flex; align-items: center; justify-content: flex-end;
-      padding-right: 10px;
-      background: #111; border-right: 1px solid #333;
-      font-size: 13px; color: #aaa; z-index: 5;
-    }
-
-    /* === ГРИД === */
-    .excel-grid {
-      display: grid; grid-template-columns: repeat(26, 90px); gap: 0;
-      padding-left: 70px; background: #0a0a0a; overflow: auto; height: calc(100vh - 158px);
-    }
-    .cell {
-      width: 90px; height: 32px; border-right: 1px solid #222; border-bottom: 1px solid #222;
-      padding: 4px 6px; outline: none; font-size: 13px; background: #111;
-      text-align: left; color: #fff;
-    }
-    .cell:focus {
-      background: #1a1a2e;
-      border: 2px solid #00ff88;
-      z-index: 1;
-      padding: 2px 4px;
-      box-shadow: 0 0 15px rgba(0,255,136,0.4);
+    @keyframes flicker {
+      0%, 100% { opacity: 0.7; text-shadow: 0 0 5px rgba(0,255,136,0.3); }
+      50% { opacity: 1; text-shadow: 0 0 15px rgba(0,255,136,0.8); }
     }
   </style>
 </head>
 <body>
+  <h1>AURASYSTEM</h1>
+  <p>Privacy-native tools.<br>No servers. No accounts. Full control.</p>
 
-<div class="excel-topbar">
-  <button class="excel-btn">Σ Сумма</button>
-  <button class="excel-btn">⌀ Среднее</button>
-  <button class="excel-btn">Фильтр</button>
-  <button class="excel-btn">График</button>
-  <button class="excel-btn">Формат</button>
-  <button id="back-to-editor" class="excel-btn">Документы</button>
-</div>
+  <a href="https://mihelson1010.github.io/aurasystem/office.html" class="btn btn-orange">Aura Office</a>
+  <a href="#" class="btn btn-blue">Aura Shop</a>
+  <a href="https://mihelson1010.github.io/aurasystem/proxy.html" class="btn btn-purple">Aura Proxy</a>
 
-<div class="excel-toolbar">
-  <div class="cell-address">A1</div>
-  <input class="formula-bar" placeholder="=SUM(A1:A5), =A1*2...">
-</div>
-
-<div class="header-row" id="col-headers"></div>
-<div class="excel-grid" id="excel-grid"></div>
-
-<script>
-let currentCell = null;
-
-function splitCell(addr) {
-  const colMatch = addr.match(/^[A-Z]+/);
-  const rowMatch = addr.match(/\d+$/);
-  if (!colMatch || !rowMatch) return [0, 0];
-  let col = 0;
-  for (let i = 0; i < colMatch[0].length; i++) {
-    col = col * 26 + (colMatch[0].charCodeAt(i) - 64);
-  }
-  return [col - 1, parseInt(rowMatch[0]) - 1];
-}
-
-function getCellValue(addr) {
-  const cell = document.querySelector(`.cell[data-addr="${addr}"]`);
-  return cell ? (cell.dataset.value || cell.textContent.trim()) : '0';
-}
-
-function parseFormula(formula) {
-  if (!formula.startsWith('=')) return formula;
-
-  try {
-    // =SUM(A1:A5)
-    if (formula.includes('SUM(')) {
-      const range = formula.match(/SUM\(([^)]+)\)/)[1];
-      const [start, end] = range.split(':');
-      const [sc, sr] = splitCell(start);
-      const [ec, er] = splitCell(end);
-      let sum = 0;
-      for (let r = sr; r <= er; r++) {
-        for (let c = sc; c <= ec; c++) {
-          const addr = String.fromCharCode(65 + c) + (r + 1);
-          sum += parseFloat(getCellValue(addr)) || 0;
-        }
-      }
-      return sum;
-    }
-
-    // =AVERAGE(B1:B5)
-    if (formula.includes('AVERAGE(')) {
-      const range = formula.match(/AVERAGE\(([^)]+)\)/)[1];
-      const [start, end] = range.split(':');
-      const [sc, sr] = splitCell(start);
-      const [ec, er] = splitCell(end);
-      let sum = 0, count = 0;
-      for (let r = sr; r <= er; r++) {
-        for (let c = sc; c <= ec; c++) {
-          const addr = String.fromCharCode(65 + c) + (r + 1);
-          const val = parseFloat(getCellValue(addr)) || 0;
-          sum += val; count++;
-        }
-      }
-      return count > 0 ? (sum / count).toFixed(2) : '0';
-    }
-
-    // =A1+B1, =A1*2
-    const expr = formula.slice(1).replace(/[A-Z]+\d+/g, match => {
-      return parseFloat(getCellValue(match)) || 0;
-    });
-    return Function('return ' + expr)();
-  } catch (e) {
-    return '#ERROR';
-  }
-}
-
-function createExcelGrid() {
-  const colHeaders = document.getElementById('col-headers');
-  const grid = document.getElementById('excel-grid');
-  colHeaders.innerHTML = ''; grid.innerHTML = '';
-
-  for (let i = 0; i < 26; i++) {
-    const letter = String.fromCharCode(65 + i);
-    const th = document.createElement('div');
-    th.className = 'col-header';
-    th.textContent = letter;
-    colHeaders.appendChild(th);
-  }
-
-  for (let row = 1; row <= 100; row++) {
-    const rn = document.createElement('div');
-    rn.className = 'row-number';
-    rn.textContent = row;
-    grid.appendChild(rn);
-
-    for (let col = 0; col < 26; col++) {
-      const letter = String.fromCharCode(65 + col);
-      const addr = `${letter}${row}`;
-      const cell = document.createElement('div');
-      cell.className = 'cell';
-      cell.contentEditable = 'true';
-      cell.dataset.addr = addr;
-      cell.dataset.value = '';
-
-      cell.addEventListener('focus', () => {
-        currentCell = cell;
-        document.querySelector('.cell-address').textContent = addr;
-        document.querySelector('.formula-bar').value = cell.dataset.formula || cell.textContent;
-      });
-
-      cell.addEventListener('input', () => {
-        const input = cell.textContent;
-        if (input.startsWith('=')) {
-          cell.dataset.formula = input;
-          const result = parseFormula(input);
-          cell.dataset.value = result;
-          cell.textContent = result;
-        } else {
-          cell.dataset.formula = '';
-          cell.dataset.value = input;
-        }
-      });
-
-      grid.appendChild(cell);
-    }
-  }
-}
-
-// КНОПКА "ДОКУМЕНТ" — ВОЗВРАТ В РЕДАКТОР
-document.getElementById('back-to-editor').onclick = () => {
-  window.location.href = 'https://mihelson1010.github.io/aurasystem/editor/';
-};
-
-createExcelGrid();
-</script>
+  <div class="footer">
+    Produced by mihelson1010 © 2025
+  </div>
 </body>
 </html>
