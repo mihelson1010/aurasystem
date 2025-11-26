@@ -48,11 +48,12 @@
       overflow: hidden;
       transition: all 0.3s ease;
     }
-    .window iframe {
+    .window a {
+      display: block;
       width: 100%;
       height: 300px;
-      border: none;
-      display: block;
+      color: var(--text);
+      text-decoration: none;
     }
     .description {
       padding: 10px;
@@ -100,7 +101,7 @@
       left: 0;
       right: 0;
       background: #111;
-      color: #00ff88;
+      color: var(--glow);
       padding: 8px;
       font-size: 0.9rem;
       overflow: hidden;
@@ -110,10 +111,10 @@
     .ticker span {
       display: inline-block;
       padding-left: 100%;
-      animation: marquee 20s linear infinite;
+      animation: marquee 25s linear infinite;
     }
     @keyframes marquee {
-      0% { transform: translateX(0); }
+      0% { transform: translateX(100%); }
       100% { transform: translateX(-100%); }
     }
   </style>
@@ -123,54 +124,65 @@
 
   <div class="grid">
     <div class="window">
-      <iframe src="https://www.poloniex.com/ru/"></iframe>
-      <div class="description" onclick="expandWindow(this.parentNode)">
+      <a href="https://www.poloniex.com/ru/" target="_blank" rel="noopener">
+        <iframe src="https://www.poloniex.com/ru/" title="Poloniex"></iframe>
+      </a>
+      <div class="description" onclick="expandWindow('https://www.poloniex.com/ru/')">
         Poloniex — CEX with BTC/ETH pairs, +5-10% volatility on USDT.
       </div>
     </div>
     <div class="window">
-      <iframe src="https://dexscreener.com/new-pairs"></iframe>
-      <div class="description" onclick="expandWindow(this.parentNode)">
+      <a href="https://dexscreener.com/new-pairs" target="_blank" rel="noopener">
+        <iframe src="https://dexscreener.com/new-pairs" title="DexScreener"></iframe>
+      </a>
+      <div class="description" onclick="expandWindow('https://dexscreener.com/new-pairs')">
         DexScreener — New pairs on Solana, +2383% pumps, high risk rugs.
       </div>
     </div>
     <div class="window">
-      <iframe src="https://coinmarketcap.com/"></iframe>
-      <div class="description" onclick="expandWindow(this.parentNode)">
+      <a href="https://coinmarketcap.com/" target="_blank" rel="noopener">
+        <iframe src="https://coinmarketcap.com/" title="CoinMarketCap"></iframe>
+      </a>
+      <div class="description" onclick="expandWindow('https://coinmarketcap.com/')">
         CoinMarketCap — Crypto rankings, market cap, volume for BTC/ETH.
       </div>
     </div>
     <div class="window">
-      <iframe src="https://www.binance.com"></iframe>
-      <div class="description" onclick="expandWindow(this.parentNode)">
+      <a href="https://www.binance.com" target="_blank" rel="noopener">
+        <iframe src="https://www.binance.com" title="Binance"></iframe>
+      </a>
+      <div class="description" onclick="expandWindow('https://www.binance.com')">
         Binance — Largest exchange by volume, spot, futures, P2P, staking.
       </div>
     </div>
     <div class="window">
-      <iframe src="https://www.coinbase.com"></iframe>
-      <div class="description" onclick="expandWindow(this.parentNode)">
+      <a href="https://www.coinbase.com" target="_blank" rel="noopener">
+        <iframe src="https://www.coinbase.com" title="Coinbase"></iframe>
+      </a>
+      <div class="description" onclick="expandWindow('https://www.coinbase.com')">
         Coinbase — Regulated, beginner-friendly, with advanced trading.
       </div>
     </div>
     <div class="window">
-      <iframe src="https://www.kraken.com"></iframe>
-      <div class="description" onclick="expandWindow(this.parentNode)">
+      <a href="https://www.kraken.com" target="_blank" rel="noopener">
+        <iframe src="https://www.kraken.com" title="Kraken"></iframe>
+      </a>
+      <div class="description" onclick="expandWindow('https://www.kraken.com')">
         Kraken — Reliable, high security, advanced trading tools.
       </div>
     </div>
   </div>
 
   <div class="ticker">
-    <span>BTC/USD: 87,656.43 (+0.30%) • ETH/USD: 2,940.55 (-2.5%) • USD/EUR: 0.92 • USD/RUB: 95 • ETH/EUR: 2,700 • (Data as of Nov 26, 2025) • Stay tuned for updates...</span>
+    <span>BTC/USD: 87,656 (+0.3%) • ETH/USD: 2,940 (-2.5%) • USD/EUR: 0.92 • USD/RUB: 95 • Bitcoin Hits $87K • Ethereum ETF Approved • Solana Pumps 15% • Latest DeFi Hack Alert • Stay Tuned...</span>
   </div>
 
   <script>
-    function expandWindow(windowElem) {
-      const iframeSrc = windowElem.querySelector('iframe').src;
+    function expandWindow(src) {
       const fullScreen = document.createElement('div');
       fullScreen.classList.add('full-screen');
       fullScreen.innerHTML = `
-        <iframe src="${iframeSrc}"></iframe>
+        <iframe src="${src}" title="${src}"></iframe>
         <button class="close-btn" onclick="this.parentNode.remove()">Закрыть</button>
       `;
       document.body.appendChild(fullScreen);
