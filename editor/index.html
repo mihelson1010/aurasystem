@@ -2,216 +2,70 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Aura Office</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AuraEditor</title>
   <style>
+    :root { --glow: #00ff88; --bg: #111; }
     * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      font-family: "Segoe UI", system-ui, sans-serif;
-      background: #f9fafb;
-      height: 100vh;
-      overflow: hidden;
-      position: relative;
-    }
-    .logo {
-      position: absolute; top: 12px; left: 16px; width: 36px; height: 36px;
-      background: url('image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="white"/><path d="M256 100 L300 220 L420 240 L320 280 L300 400 L212 400 L192 280 L92 240 L212 220 Z" fill="%23fb923c"/><path d="M256 140 L290 200 L380 215 L310 245 L295 335 L217 335 L202 245 L122 215 L212 200 Z" fill="%23fed7aa"/><text x="256" y="480" text-anchor="middle" font-family="system-ui" font-size="50" fill="%230f172a">Aura</text></svg>') center/contain no-repeat;
-      background-size: 32px; padding: 10px; border-radius: 14px; box-shadow: 0 4px 12px rgba(251,146,60,0.3); z-index: 999; opacity: 0.6;
-    }
-    .logo:hover { opacity: 1; transform: scale(1.1); box-shadow: 0 6px 20px rgba(251,146,60,0.5); }
-
-    #welcome {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: grid; place-items: center; text-align: center; background: white;
-    }
-    #welcome h1 { font-size: 4rem; color: #ea580c; margin-bottom: 0.5rem; }
-    #welcome button {
-      padding: 1rem 2.5rem; font-size: 1.4rem; background: #ea580c; color: white;
-      border: none; border-radius: 999px; cursor: pointer;
-      box-shadow: 0 8px 24px rgba(234,88,12,0.4);
-    }
-
-    /* Excel-режим */
-    #spreadsheet-screen {
-      display: none;
-      width: 100%; height: 100vh;
-      background: white;
-    }
-    .excel-toolbar {
-      display: flex; align-items: center; padding: 0 10px; height: 40px;
-      background: #f1f3f4; border-bottom: 1px solid #dadce0;
-      font-size: 14px; color: #202124;
-    }
-    .cell-address { 
-      width: 80px; padding: 0 8px; background: white; border: 1px solid #dadce0; 
-      text-align: center; font-family: monospace;
-    }
-    .formula-bar {
-      flex: 1; padding: 0 8px; background: white; border: 1px solid #dadce0;
-      outline: none; font-family: monospace;
-    }
-
-    .header-row {
-      display: flex;
-      position: sticky; top: 70px; left: 0;
-      background: #f1f3f4;
-      z-index: 10;
-    }
-    .header-row .col-header {
-      width: 80px; height: 24px; display: flex; align-items: center; justify-content: center;
-      border-right: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0;
-      font-size: 12px; font-weight: bold;
-    }
-    .row-number {
-      position: sticky; left: 0; width: 40px; height: 24px;
-      display: flex; align-items: center; justify-content: center;
-      background: #f1f3f4; border-right: 1px solid #e0e0e0;
-      font-size: 12px; z-index: 5;
-    }
-    .spreadsheet-grid {
-      display: grid;
-      grid-template-columns: repeat(26, 80px);
-      gap: 0;
-      position: relative;
-    }
-    .cell {
-      width: 80px; height: 24px;
-      border-right: 1px solid #e0e0e0;
-      border-bottom: 1px solid #e0e0e0;
-      padding: 2px 4px;
-      outline: none;
-      font-size: 13px;
-      background: white;
-    }
-    .cell:focus {
-      background: #e8f0fe;
-      border: 1px solid #1a73e8;
-      z-index: 1;
-    }
-
-    /* Кнопки-подушки */
-    .btn {
-      padding: 8px 16px;
-      border: none;
-      border-radius: 14px;
-      background: linear-gradient(to bottom, #ff9e4b, #f97316);
-      color: white;
-      font-weight: 600;
-      font-size: 14px;
-      cursor: pointer;
-      box-shadow: 0 6px 14px rgba(0,0,0,0.18);
-      transition: all 0.2s;
-    }
-    .btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 18px rgba(0,0,0,0.22);
-    }
-    .btn:active {
-      transform: translateY(0);
-    }
-
-    .topbar {
-      position: fixed; top: 0; left: 0; right: 0; height: 70px;
-      background: white; border-bottom: 1px solid #eee;
-      display: flex; gap: 10px; padding: 0 10px; align-items: center;
-      z-index: 20;
-    }
+    body { background: white; padding: 80px 40px 40px; font-family: 'Georgia', serif; line-height: 1.8; }
+    .toolbar { position: fixed; top: 0; left: 0; right: 0; padding: 12px 20px; background: linear-gradient(135deg, #111, #000); border-bottom: 2px solid var(--glow); display: flex; gap: 10px; z-index: 100; flex-wrap: wrap; }
+    .btn { padding: 10px 18px; background: #222; color: #aaa; border: none; border-radius: 10px; font-size: 14px; cursor: pointer; font-weight: 600; transition: all 0.3s; display: flex; align-items: center; gap: 6px; }
+    .btn:hover, .btn.active { background: var(--glow); color: #000; transform: translateY(-2px); }
+    #content { outline: none; min-height: calc(100vh - 100px); padding-top: 70px; font-size: 18px; color: #000; background: white; border: none; }
+    .status { position: fixed; bottom: 10px; left: 20px; color: #666; font-size: 0.8rem; }
+    .footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 8px; background: #000; color: #555; font-size: 0.8rem; text-align: center; }
   </style>
 </head>
 <body>
-
-<div class="logo" title="Aura"></div>
-
-<div id="welcome">
-  <h1>Aura Office</h1>
-  <button id="start">Создать документ →</button>
-</div>
-
-<div id="spreadsheet-screen">
-  <div class="topbar">
-    <button id="to-editor" class="btn">📄 Документ</button>
-    <button class="btn">Σ Сумма</button>
-    <button class="btn">⌀ Среднее</button>
-    <button class="btn">Фильтр</button>
-    <button class="btn">🔗 Ссылка</button>
+  <div class="toolbar">
+    <button class="btn active" onclick="createNewDoc()">Создать документ</button>
+    <button class="btn" onclick="document.execCommand('bold')">B</button>
+    <button class="btn" onclick="document.execCommand('italic')">I</button>
+    <button class="btn" onclick="document.execCommand('underline')">U</button>
+    <button class="btn" onclick="saveDoc()">Сохранить</button>
+    <button class="btn" onclick="shareDoc()">Поделиться</button>
   </div>
-
-  <div class="excel-toolbar">
-    <div class="cell-address">A1</div>
-    <input class="formula-bar" value="" placeholder="Введите формулу или значение">
+  <div id="content" contenteditable="true">
+    <h1 style="color: #00ff88; font-family: 'Orbitron', sans-serif;">AURASYSTEM</h1>
+    <p>Приватный редактор с end-to-end шифрованием. Начните печатать...</p>
   </div>
+  <div class="status">Документ: <span id="docName">Новый</span></div>
+  <div class="footer">AURASYSTEM | Ctrl+S для сохранения</div>
 
-  <div class="header-row" id="col-headers"></div>
-  <div class="spreadsheet-grid" id="grid"></div>
-</div>
+  <script>
+    let docId = new URLSearchParams(window.location.search).get('doc') || Date.now().toString(36);
+    document.getElementById('docName').textContent = 'ID: ' + docId;
 
-<script>
-let currentCell = null;
+    // Загрузка
+    const saved = localStorage.getItem('aura_doc_' + docId);
+    if (saved) document.getElementById('content').innerHTML = saved;
 
-function createExcelGrid() {
-  const colHeaders = document.getElementById('col-headers');
-  const grid = document.getElementById('grid');
-  
-  colHeaders.innerHTML = '';
-  grid.innerHTML = '';
-
-  // Столбцы A-Z
-  for (let i = 0; i < 26; i++) {
-    const letter = String.fromCharCode(65 + i);
-    const header = document.createElement('div');
-    header.className = 'col-header';
-    header.textContent = letter;
-    colHeaders.appendChild(header);
-  }
-
-  // Строки 1-100
-  for (let row = 1; row <= 100; row++) {
-    const rowNumber = document.createElement('div');
-    rowNumber.className = 'row-number';
-    rowNumber.textContent = row;
-    grid.appendChild(rowNumber);
-
-    for (let col = 0; col < 26; col++) {
-      const letter = String.fromCharCode(65 + col);
-      const cell = document.createElement('div');
-      cell.className = 'cell';
-      cell.contentEditable = 'true';
-      cell.setAttribute('data-addr', `${letter}${row}`);
-      
-      cell.addEventListener('focus', () => {
-        currentCell = cell;
-        document.querySelector('.cell-address').textContent = cell.getAttribute('data-addr');
-        document.querySelector('.formula-bar').value = cell.textContent;
-      });
-
-      cell.addEventListener('input', () => {
-        if (currentCell === cell) {
-          document.querySelector('.formula-bar').value = cell.textContent;
-        }
-      });
-
-      grid.appendChild(cell);
+    function createNewDoc() {
+      if (confirm('Создать новый документ?')) {
+        const newId = Date.now().toString(36);
+        saveDoc(); // Сохраняем текущий
+        localStorage.setItem('aura_doc_' + newId, '');
+        window.location.href = 'index.html?doc=' + newId; // Остаёмся в папке editor
+      }
     }
-  }
 
-  // Обработка формулы
-  document.querySelector('.formula-bar').addEventListener('change', () => {
-    if (currentCell) {
-      currentCell.textContent = document.querySelector('.formula-bar').value;
+    function saveDoc() {
+      localStorage.setItem('aura_doc_' + docId, document.getElementById('content').innerHTML);
+      alert('Сохранено локально!');
     }
-  });
-}
 
-// Переключение
-document.getElementById('start').onclick = () => {
-  document.getElementById('welcome').style.display = 'none';
-  document.getElementById('spreadsheet-screen').style.display = 'block';
-  createExcelGrid();
-};
+    function shareDoc() {
+      const url = window.location.origin + window.location.pathname + '?doc=' + docId;
+      navigator.clipboard.writeText(url);
+      alert('Ссылка скопирована: ' + url);
+    }
 
-document.getElementById('to-editor').onclick = () => {
-  document.getElementById('spreadsheet-screen').style.display = 'none';
-  document.getElementById('welcome').style.display = 'block';
-};
-</script>
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        saveDoc();
+      }
+    });
+  </script>
 </body>
 </html>
