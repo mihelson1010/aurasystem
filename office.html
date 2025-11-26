@@ -3,139 +3,173 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Aura Office</title>
+  <title>AurаExcel</title>
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; font-family: system-ui, sans-serif; }
+    * { margin:0; padding:0; box-sizing:border-box; font-family: "Segoe UI", system-ui, sans-serif; }
     body {
-      background: #fff7ed;
+      background: #f9fafb;
       height: 100vh;
       overflow: hidden;
       position: relative;
     }
-    .logo {
-      position: absolute; top: 20px; left: 24px; width: 40px; height: 40px;
-      background: url('image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="white"/><path d="M256 100 L300 220 L420 240 L320 280 L300 400 L212 400 L192 280 L92 240 L212 220 Z" fill="%23fb923c"/><path d="M256 140 L290 200 L380 215 L310 245 L295 335 L217 335 L202 245 L122 215 L212 200 Z" fill="%23fed7aa"/><text x="256" y="480" text-anchor="middle" font-family="system-ui" font-size="50" fill="%230f172a">Aura</text></svg>') center/contain no-repeat;
-      background-size: 38px; padding: 12px; border-radius: 16px; box-shadow: 0 6px 20px rgba(251,146,60,0.3); z-index: 999; opacity: 0.5;
-    }
-    #welcome, #editor-screen, #excel-screen { display: none; }
-    #editor-screen.active, #excel-screen.active, #welcome.active { display: block; }
 
-    /* Документ-режим */
-    #editor-screen {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100vh; background: white;
+    .excel-topbar {
+      display: flex; gap: 12px; padding: 14px 20px; background: #207145; /* Зелёный цвет Excel */
+      align-items: center;
+      border-bottom: 1px solid #1a5a37;
+      flex-wrap: wrap;
     }
-    .topbar {
-      position: fixed; top: 0; left: 0; right: 0; height: 70px; background: white;
-      display: flex; flex-wrap: wrap; gap: 8px; padding: 0 15px; align-items: center;
-      border-bottom: 1px solid #eee; z-index: 99;
+    .excel-btn {
+      padding: 10px 22px; border: none; border-radius: 16px; color: white;
+      font-weight: 600; font-size: 16px; cursor: pointer;
+      background: linear-gradient(145deg, #2a8f5e, #207145);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.2);
+      transition: all 0.25s;
     }
-    .btn {
-      padding: 8px 16px; border: none; border-radius: 12px; background: #fb923c; color: white;
-      font-weight: 600; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      transition: all 0.2s;
+    .excel-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+      background: linear-gradient(145deg, #30a26d, #258352);
     }
-    .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.15); }
-    #editor { width: 100%; height: calc(100vh - 130px); padding: 80px 100px 50px; outline: none; background: #fff7ed; }
 
-    /* Excel-режим */
-    #excel-screen {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100vh;
-      background: white;
-    }
     .excel-toolbar {
-      display: flex; align-items: center; padding: 0 10px; height: 40px;
-      background: #f1f3f4; border-bottom: 1px solid #dadce0;
+      display: flex; align-items: center; padding: 0 20px 0 120px; height: 48px;
+      background: #f1f5f9; border-bottom: 1px solid #cbd5e1;
     }
     .cell-address { 
-      width: 80px; padding: 0 8px; background: white; border: 1px solid #dadce0; 
-      text-align: center; font-family: monospace;
+      width: 100px; padding: 0 12px; background: white; border: 1px solid #cbd5e1; 
+      text-align: center; font-family: monospace; font-size: 15px;
     }
     .formula-bar {
-      flex: 1; padding: 0 8px; background: white; border: 1px solid #dadce0;
-      outline: none; font-family: monospace; font-size: 14px;
+      flex: 1; padding: 0 14px; background: white; border: 1px solid #cbd5e1;
+      outline: none; font-family: monospace; font-size: 16px;
     }
     .header-row {
-      display: flex; position: sticky; top: 70px; left: 0; background: #f1f3f4;
+      display: flex; position: sticky; top: 162px; left: 0; background: #f1f5f9;
+      z-index: 10; border-bottom: 1px solid #cbd5e1;
     }
     .col-header {
-      width: 80px; height: 24px; display: flex; align-items: center; justify-content: center;
-      border-right: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0;
-      font-size: 12px; font-weight: bold;
+      width: 90px; height: 28px; display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 600; color: #1e293b;
+      border-right: 1px solid #e2e8f0;
     }
     .row-number {
-      position: sticky; left: 0; width: 40px; height: 24px;
-      display: flex; align-items: center; justify-content: center;
-      background: #f1f3f4; border-right: 1px solid #e0e0e0;
-      font-size: 12px; z-index: 5;
+      position: sticky; left: 0; width: 80px; height: 28px;
+      display: flex; align-items: center; justify-content: flex-end;
+      padding-right: 10px;
+      background: #f1f5f9; border-right: 1px solid #e2e8f0;
+      font-size: 14px; color: #334155; z-index: 5;
     }
     .excel-grid {
-      display: grid; grid-template-columns: repeat(26, 80px); gap: 0;
+      display: grid; grid-template-columns: repeat(26, 90px); gap: 0;
+      padding-left: 80px; background: white;
     }
     .cell {
-      width: 80px; height: 24px; border-right: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0;
-      padding: 2px 4px; outline: none; font-size: 13px; background: white;
+      width: 90px; height: 28px; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;
+      padding: 3px 6px; outline: none; font-size: 14px; background: white;
+      text-align: left;
     }
     .cell:focus {
-      background: #e8f0fe; border: 1px solid #1a73e8;
+      background: #dbeafe;
+      border: 2px solid #3b82f6;
+      z-index: 1;
+      padding: 1px 4px;
     }
-    .status { position: fixed; bottom: 0; left: 0; right: 0; padding: 10px; text-align: center; color: #555; }
   </style>
 </head>
 <body>
 
-<div class="logo" title="Aura"></div>
-
-<div id="welcome" class="active">
-  <div style="height:100vh;display:grid;place-items:center;text-align:center">
-    <div>
-      <h1 style="font-size:5rem;color:#ea580c">Aura</h1>
-      <p style="font-size:1.5rem;margin:1.5rem 0">Приватный офис с end-to-end шифрованием</p>
-      <button id="start" style="padding:1.4rem 4rem;font-size:1.7rem;background:#ea580c;color:white;border:none;border-radius:999px;cursor:pointer">Создать документ →</button>
-    </div>
-  </div>
+<div class="excel-topbar">
+  <button class="excel-btn">Σ Сумма</button>
+  <button class="excel-btn">⌀ Среднее</button>
+  <button class="excel-btn">Фильтр</button>
+  <button class="excel-btn">График</button>
+  <button class="excel-btn">Формат</button>
+  <button id="back-to-editor" class="excel-btn">📄 Документ</button>
 </div>
 
-<div id="editor-screen">
-  <div class="topbar">
-    <button data-cmd="bold">Ж</button>
-    <button data-cmd="italic">К</button>
-    <button data-cmd="underline">П</button>
-    <button data-cmd="strike">Зач</button>
-    <button data-cmd="bulletList">•</button>
-    <button data-cmd="orderedList">1.</button>
-    <button data-cmd="taskList">☑</button>
-    <button data-cmd="insertTable">Таблица</button>
-    <button id="export-pdf">📄 PDF</button>
-    <button id="export-html">📤 HTML</button>
-    <button id="import-html">📥 Импорт</button>
-    <button id="print-btn">🖨️ Печать</button>
-    <button id="cipher-btn">🔒 QR</button>
-    <button id="share-btn">✉️ Поделиться</button>
-    <button id="aur-excel">📊 AurExcel</button>
-    <button id="theme-btn">🌙 Тема</button>
-  </div>
-  <div id="editor" contenteditable="true">Начните писать...</div>
-  <div class="status">Защищённая комната активна — шифрование AES-256-GCM</div>
+<div class="excel-toolbar">
+  <div class="cell-address">A1</div>
+  <input class="formula-bar" placeholder="Введите формулу или значение">
 </div>
 
-<div id="excel-screen">
-  <div class="topbar">
-    <button id="back-to-editor">📄 Документ</button>
-    <button>Σ Сумма</button>
-    <button>⌀ Среднее</button>
-    <button>Фильтр</button>
-  </div>
-  <div class="excel-toolbar">
-    <div class="cell-address">A1</div>
-    <input class="formula-bar" placeholder="Введите формулу или значение">
-  </div>
-  <div class="header-row" id="col-headers"></div>
-  <div class="excel-grid" id="excel-grid"></div>
-  <div class="status">Режим: AurExcel — полный Excel-клон</div>
-</div>
+<div class="header-row" id="col-headers"></div>
+<div class="excel-grid" id="excel-grid"></div>
 
 <script>
 let currentCell = null;
+
+function splitCell(addr) {
+  const colMatch = addr.match(/^[A-Z]+/);
+  const rowMatch = addr.match(/\d+$/);
+  if (!colMatch || !rowMatch) return [0, 0];
+  let col = 0;
+  for (let i = 0; i < colMatch[0].length; i++) {
+    col = col * 26 + (colMatch[0].charCodeAt(i) - 64);
+  }
+  return [col - 1, parseInt(rowMatch[0]) - 1];
+}
+
+function getCellValue(addr) {
+  const cell = document.querySelector(`.cell[data-addr="${addr}"]`);
+  return cell ? cell.textContent.trim() : '0';
+}
+
+function parseFormula(formula) {
+  if (!formula.startsWith('=')) return formula;
+
+  try {
+    // =SUM(A1:A3)
+    if (formula.includes('SUM(')) {
+      const range = formula.match(/SUM\(([^)]+)\)/)[1];
+      const [start, end] = range.split(':');
+      const [startCol, startRow] = splitCell(start);
+      const [endCol, endRow] = splitCell(end);
+      let sum = 0;
+      for (let r = startRow; r <= endRow; r++) {
+        for (let c = startCol; c <= endCol; c++) {
+          const colLetter = String.fromCharCode(65 + c);
+          const val = parseFloat(getCellValue(colLetter + (r + 1))) || 0;
+          sum += val;
+        }
+      }
+      return sum;
+    }
+
+    // =AVERAGE(B1:B5)
+    if (formula.includes('AVERAGE(')) {
+      const range = formula.match(/AVERAGE\(([^)]+)\)/)[1];
+      const [start, end] = range.split(':');
+      const [startCol, startRow] = splitCell(start);
+      const [endCol, endRow] = splitCell(end);
+      let sum = 0, count = 0;
+      for (let r = startRow; r <= endRow; r++) {
+        for (let c = startCol; c <= endCol; c++) {
+          const colLetter = String.fromCharCode(65 + c);
+          const val = parseFloat(getCellValue(colLetter + (r + 1))) || 0;
+          sum += val;
+          count++;
+        }
+      }
+      return count > 0 ? (sum / count).toFixed(2) : '0';
+    }
+
+    // =A1+B1, =A1*2 и т.д.
+    const expr = formula.slice(1);
+    if (/^[A-Z]+\d+[\+\-\*\/][A-Z]+\d+$/.test(expr) || /^[A-Z]+\d+[\+\-\*\/]\d+$/.test(expr)) {
+      return new Function('return ' + expr
+        .replace(/[A-Z]+\d+/g, match => {
+          const val = parseFloat(getCellValue(match)) || 0;
+          return val;
+        })
+      )();
+    }
+
+    return formula;
+  } catch (e) {
+    return '#ERROR';
+  }
+}
 
 function createExcelGrid() {
   const colHeaders = document.getElementById('col-headers');
@@ -152,7 +186,7 @@ function createExcelGrid() {
     colHeaders.appendChild(th);
   }
 
-  // Ячейки 100x26
+  // Строки 1–100
   for (let row = 1; row <= 100; row++) {
     const rn = document.createElement('div');
     rn.className = 'row-number';
@@ -160,18 +194,21 @@ function createExcelGrid() {
     grid.appendChild(rn);
     for (let col = 0; col < 26; col++) {
       const letter = String.fromCharCode(65 + col);
+      const addr = `${letter}${row}`;
       const cell = document.createElement('div');
       cell.className = 'cell';
       cell.contentEditable = 'true';
-      cell.setAttribute('data-addr', `${letter}${row}`);
+      cell.setAttribute('data-addr', addr);
       cell.addEventListener('focus', () => {
         currentCell = cell;
-        document.querySelector('.cell-address').textContent = cell.getAttribute('data-addr');
+        document.querySelector('.cell-address').textContent = addr;
         document.querySelector('.formula-bar').value = cell.textContent;
       });
       cell.addEventListener('input', () => {
-        if (currentCell === cell) {
-          document.querySelector('.formula-bar').value = cell.textContent;
+        if (cell.textContent.startsWith('=')) {
+          const result = parseFormula(cell.textContent);
+          cell.textContent = result;
+          cell.setAttribute('title', result);
         }
       });
       grid.appendChild(cell);
@@ -179,37 +216,12 @@ function createExcelGrid() {
   }
 }
 
-// Переключение режимов
-document.getElementById('start').onclick = () => {
-  document.getElementById('welcome').classList.remove('active');
-  document.getElementById('editor-screen').classList.add('active');
-};
-
-document.getElementById('aur-excel').onclick = () => {
-  document.getElementById('editor-screen').classList.remove('active');
-  document.getElementById('excel-screen').classList.add('active');
-  createExcelGrid();
-};
-
 document.getElementById('back-to-editor').onclick = () => {
-  document.getElementById('excel-screen').classList.remove('active');
-  document.getElementById('editor-screen').classList.add('active');
+  window.location.href = '/aurasystem/editor/';
 };
 
-// Простые команды
-document.querySelectorAll('[data-cmd]').forEach(btn => {
-  btn.onclick = () => {
-    const cmd = btn.dataset.cmd;
-    if (cmd === 'insertTable') {
-      document.execCommand('insertHTML', false, '<table border="1" style="border-collapse:collapse;width:100%"><tr><td>A1</td><td>B1</td></tr></table>');
-    } else {
-      document.execCommand(cmd, false, null);
-    }
-  };
-});
-
-// Кнопки экспорта — заглушки
-document.getElementById('export-pdf').onclick = () => alert('PDF экспорт (будет реализован)');
+createExcelGrid();
 </script>
 </body>
 </html>
+
